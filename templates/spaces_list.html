@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">File Master: Kelola Spaces</h1>
+
+<div class="bg-white rounded-xl shadow p-6 mb-8">
+    <h2 class="font-bold text-lg mb-4">Tambah Space Baru</h2>
+    <form method="post" action="/spaces/create" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+        <div>
+            <label class="block text-xs font-semibold mb-1">Nama Space</label>
+            <input type="text" name="nama_space" required placeholder="Contoh: Ruang Bromo" class="w-full border rounded px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold mb-1">Tipe</label>
+            <select name="tipe" class="w-full border rounded px-3 py-2 text-sm">
+                <option value="Hot Desk">Hot Desk</option>
+                <option value="Meeting Room">Meeting Room</option>
+                <option value="Private Office">Private Office</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold mb-1">Kapasitas</label>
+            <input type="number" name="kapasitas" required min="1" value="1" class="w-full border rounded px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold mb-1">Harga / Jam (Rp)</label>
+            <input type="number" name="harga_per_jam" required min="1000" step="1000" class="w-full border rounded px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold mb-1">Fasilitas</label>
+            <input type="text" name="fasilitas" required placeholder="WiFi, AC, Proyektor" class="w-full border rounded px-3 py-2 text-sm">
+        </div>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-sm">
+            + Tambah
+        </button>
+    </form>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
+            <tr>
+                <th class="px-4 py-3">ID</th>
+                <th class="px-4 py-3">Nama Space</th>
+                <th class="px-4 py-3">Tipe</th>
+                <th class="px-4 py-3">Kapasitas</th>
+                <th class="px-4 py-3">Harga/Jam</th>
+                <th class="px-4 py-3">Fasilitas</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Aksi</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            {% for sp in spaces %}
+            <tr>
+                <td class="px-4 py-3">{{ sp.id }}</td>
+                <td class="px-4 py-3 font-semibold">{{ sp.nama_space }}</td>
+                <td class="px-4 py-3">{{ sp.tipe }}</td>
+                <td class="px-4 py-3">{{ sp.kapasitas }} org</td>
+                <td class="px-4 py-3">Rp {{ "{:,.0f}".format(sp.harga_per_jam) }}</td>
+                <td class="px-4 py-3">{{ sp.fasilitas }}</td>
+                <td class="px-4 py-3">
+                    {% if sp.is_active %}
+                    <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs">Aktif</span>
+                    {% else %}
+                    <span class="bg-slate-200 text-slate-600 px-2 py-1 rounded text-xs">Nonaktif</span>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3 flex space-x-2">
+                    <a href="/spaces/{{ sp.id }}/edit" class="bg-amber-500 text-white px-3 py-1 rounded text-xs hover:bg-amber-600">Edit</a>
+                    <form method="post" action="/spaces/{{ sp.id }}/delete" onsubmit="return confirm('Hapus ruangan ini?')">
+                        <button class="bg-rose-600 text-white px-3 py-1 rounded text-xs hover:bg-rose-700">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

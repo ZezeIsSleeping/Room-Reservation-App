@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoWorkSpace - Sistem Reservasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+    {% if user %}
+    <nav class="bg-indigo-700 text-white shadow no-print">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-6">
+                <a href="/dashboard" class="font-bold text-lg tracking-wide">CoWorkSpace</a>
+                <a href="/dashboard" class="hover:text-indigo-200 text-sm">Dashboard</a>
+                {% if user.role == 'admin' %}
+                <a href="/spaces" class="hover:text-indigo-200 text-sm">Master Spaces</a>
+                <a href="/reports" class="hover:text-indigo-200 text-sm">Laporan (Report)</a>
+                {% endif %}
+            </div>
+            <div class="flex items-center space-x-4 text-sm">
+                <span class="bg-indigo-900 px-3 py-1 rounded-full">
+                    {{ user.nama }} ({{ user.role|upper }})
+                </span>
+                <a href="/logout" class="bg-rose-600 hover:bg-rose-700 px-3 py-1 rounded font-medium">Logout</a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-grow">
+        {% if request.query_params.get('msg') %}
+        <div class="mb-4 p-3 rounded bg-emerald-100 border border-emerald-400 text-emerald-800 text-sm no-print">
+            {{ request.query_params.get('msg') }}
+        </div>
+        {% endif %}
+        {% if request.query_params.get('err') %}
+        <div class="mb-4 p-3 rounded bg-rose-100 border border-rose-400 text-rose-800 text-sm no-print">
+            {{ request.query_params.get('err') }}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

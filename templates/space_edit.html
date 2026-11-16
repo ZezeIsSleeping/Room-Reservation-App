@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
+    <h1 class="text-xl font-bold mb-4">Edit Master Space: {{ space.nama_space }}</h1>
+    <form method="post" action="/spaces/{{ space.id }}/edit" class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium mb-1">Nama Space</label>
+            <input type="text" name="nama_space" value="{{ space.nama_space }}" required class="w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Tipe</label>
+            <select name="tipe" class="w-full border rounded px-3 py-2">
+                <option value="Hot Desk" {% if space.tipe == 'Hot Desk' %}selected{% endif %}>Hot Desk</option>
+                <option value="Meeting Room" {% if space.tipe == 'Meeting Room' %}selected{% endif %}>Meeting Room</option>
+                <option value="Private Office" {% if space.tipe == 'Private Office' %}selected{% endif %}>Private Office</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Kapasitas</label>
+            <input type="number" name="kapasitas" value="{{ space.kapasitas }}" required class="w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Harga / Jam</label>
+            <input type="number" name="harga_per_jam" value="{{ space.harga_per_jam|int }}" required class="w-full border rounded px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Fasilitas</label>
+            <input type="text" name="fasilitas" value="{{ space.fasilitas }}" required class="w-full border rounded px-3 py-2">
+        </div>
+        <div class="flex items-center space-x-2">
+            <input type="checkbox" name="is_active" id="is_active" {% if space.is_active %}checked{% endif %}>
+            <label for="is_active" class="text-sm">Ruangan Aktif (Tersedia untuk dipesan)</label>
+        </div>
+        <div class="flex space-x-3 pt-2">
+            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded font-semibold">Simpan Perubahan</button>
+            <a href="/spaces" class="bg-slate-200 px-4 py-2 rounded">Batal</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

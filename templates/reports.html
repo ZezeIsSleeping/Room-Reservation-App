@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-wrap justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Laporan Okupansi & Transaksi Co-Working</h1>
+    <div class="flex space-x-2 no-print">
+        <a href="/reports/export-csv?start_date={{ start_date }}&end_date={{ end_date }}"
+           class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+            Download CSV
+        </a>
+        <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+            Cetak / PDF
+        </button>
+    </div>
+</div>
+
+<!-- Filter Periode -->
+<form method="get" action="/reports" class="bg-white p-4 rounded-xl shadow mb-6 flex flex-wrap gap-4 items-end no-print">
+    <div>
+        <label class="block text-xs font-semibold mb-1">Dari Tanggal</label>
+        <input type="date" name="start_date" value="{{ start_date }}" class="border rounded px-3 py-1.5 text-sm">
+    </div>
+    <div>
+        <label class="block text-xs font-semibold mb-1">Sampai Tanggal</label>
+        <input type="date" name="end_date" value="{{ end_date }}" class="border rounded px-3 py-1.5 text-sm">
+    </div>
+    <button type="submit" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm font-semibold">Filter</button>
+    <a href="/reports" class="text-sm text-slate-500 underline py-1.5">Reset</a>
+</form>
+
+<!-- Rekap Per Ruangan -->
+<div class="bg-white rounded-xl shadow overflow-hidden mb-8">
+    <div class="p-4 border-b bg-slate-50 font-bold">Rekapitulasi Pendapatan per Space (Status: Confirmed)</div>
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-100 text-xs uppercase">
+            <tr>
+                <th class="px-4 py-3">Nama Space</th>
+                <th class="px-4 py-3">Tipe</th>
+                <th class="px-4 py-3">Jumlah Booking</th>
+                <th class="px-4 py-3">Total Jam Terpakai</th>
+                <th class="px-4 py-3">Total Pendapatan</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            {% for item in rekap_spaces %}
+            <tr>
+                <td class="px-4 py-3 font-semibold">{{ item.nama_space }}</td>
+                <td class="px-4 py-3">{{ item.tipe }}</td>
+                <td class="px-4 py-3">{{ item.jumlah_booking }}x</td>
+                <td class="px-4 py-3">{{ item.total_jam }} Jam</td>
+                <td class="px-4 py-3 font-semibold text-emerald-700">Rp {{ "{:,.0f}".format(item.total_pendapatan) }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="bg-indigo-50 font-bold">
+                <td colspan="4" class="px-4 py-3 text-right">GRAND TOTAL PENDAPATAN:</td>
+                <td class="px-4 py-3 text-indigo-700">Rp {{ "{:,.0f}".format(grand_total) }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Detail Transaksi -->
+<div class="bg-white rounded-xl shadow overflow-hidden">
+    <div class="p-4 border-b bg-slate-50 font-bold">Rincian Seluruh Transaksi</div>
+    <table class="w-full text-sm text-left">
+        <thead class="bg-slate-100 text-xs uppercase">
+            <tr>
+                <th class="px-4 py-3">ID</th>
+                <th class="px-4 py-3">Tanggal</th>
+                <th class="px-4 py-3">Penyewa</th>
+                <th class="px-4 py-3">Ruangan</th>
+                <th class="px-4 py-3">Waktu</th>
+                <th class="px-4 py-3">Biaya</th>
+                <th class="px-4 py-3">Status</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y">
+            {% for t in transaksi %}
+            <tr>
+                <td class="px-4 py-3">#{{ t.id }}</td>
+                <td class="px-4 py-3">{{ t.tanggal }}</td>
+                <td class="px-4 py-3">{{ t.user.nama }}</td>
+                <td class="px-4 py-3">{{ t.space.nama_space }}</td>
+                <td class="px-4 py-3">{{ t.jam_mulai.strftime('%H:%M') }} - {{ t.jam_selesai.strftime('%H:%M') }}</td>
+                <td class="px-4 py-3">Rp {{ "{:,.0f}".format(t.total_bayar) }}</td>
+                <td class="px-4 py-3 uppercase text-xs font-semibold">{{ t.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
