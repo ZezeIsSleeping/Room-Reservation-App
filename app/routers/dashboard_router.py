@@ -24,25 +24,30 @@ def dashboard(
         ).scalar()
         reservations = db.query(Reservation).order_by(Reservation.created_at.desc()).all()
 
-        return templates.TemplateResponse("dashboard_admin.html", {
-            "request": request,
-            "user": user,
-            "total_spaces": total_spaces,
-            "total_users": total_users,
-            "total_transaksi": total_transaksi,
-            "total_pendapatan": total_pendapatan,
-            "reservations": reservations
-        })
+        return templates.TemplateResponse(
+            request=request,
+            name="dashboard_admin.html",
+            context={
+                "user": user,
+                "total_spaces": total_spaces,
+                "total_users": total_users,
+                "total_transaksi": total_transaksi,
+                "total_pendapatan": total_pendapatan,
+                "reservations": reservations
+            }
+        )
 
-    # Dashboard untuk Role User
     spaces = db.query(Space).filter(Space.is_active == True).all()
     my_reservations = db.query(Reservation).filter(
         Reservation.user_id == user.id
     ).order_by(Reservation.created_at.desc()).all()
 
-    return templates.TemplateResponse("dashboard_user.html", {
-        "request": request,
-        "user": user,
-        "spaces": spaces,
-        "reservations": my_reservations
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard_user.html",
+        context={
+            "user": user,
+            "spaces": spaces,
+            "reservations": my_reservations
+        }
+    )

@@ -13,7 +13,7 @@ templates = Jinja2Templates(directory="templates")
 def login_page(request: Request, user: User | None = Depends(get_current_user)):
     if user:
         return RedirectResponse(url="/dashboard", status_code=303)
-    return templates.TemplateResponse("login.html", {"request": request, "user": None})
+    return templates.TemplateResponse(request=request, name="login.html", context={"user": None})
 
 @router.post("/login")
 def login_submit(
@@ -34,7 +34,7 @@ def login_submit(
 def register_page(request: Request, user: User | None = Depends(get_current_user)):
     if user:
         return RedirectResponse(url="/dashboard", status_code=303)
-    return templates.TemplateResponse("register.html", {"request": request, "user": None})
+    return templates.TemplateResponse(request=request, name="register.html", context={"user": None})
 
 @router.post("/register")
 def register_submit(

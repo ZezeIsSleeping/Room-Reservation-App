@@ -31,7 +31,6 @@ def report_page(
     transaksi = _filter_transactions(db, start_date, end_date)
     spaces = db.query(Space).all()
 
-    # Rekap okupansi & pendapatan per Space
     rekap_spaces = []
     for sp in spaces:
         sp_trx = [t for t in transaksi if t.space_id == sp.id and t.status == "confirmed"]
@@ -50,15 +49,18 @@ def report_page(
 
     grand_total = sum(t.total_bayar for t in transaksi if t.status == "confirmed")
 
-    return templates.TemplateResponse("reports.html", {
-        "request": request,
-        "user": admin,
-        "transaksi": transaksi,
-        "rekap_spaces": rekap_spaces,
-        "grand_total": grand_total,
-        "start_date": start_date or "",
-        "end_date": end_date or ""
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="reports.html",
+        context={
+            "user": admin,
+            "transaksi": transaksi,
+            "rekap_spaces": rekap_spaces,
+            "grand_total": grand_total,
+            "start_date": start_date or "",
+            "end_date": end_date or ""
+        }
+    )
 
 @router.get("/export-csv")
 def export_csv(
