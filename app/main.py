@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from app.database import engine, Base, SessionLocal
 from app.models import User, Space
@@ -65,6 +66,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Co-Working Space Reservation", lifespan=lifespan)
 
+
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.include_router(auth_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(spaces_router.router)

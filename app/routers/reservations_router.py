@@ -9,6 +9,54 @@ from app.auth import require_user, require_admin
 
 router = APIRouter(prefix="/reservations")
 
+@router.get("/api/spaces/occupied")
+def get_occupied_spaces(
+    tanggal: date,
+    jam_mulai: time,
+    jam_selesai: time,
+    db: Session = Depends(get_db)
+):
+    # Cari reservasi yang sudah dibayar (confirmed) dan waktunya bertabrakan
+    overlapping = db.query(Reservation).filter(
+        Reservation.tanggal == tanggal,
+        Reservation.status == "confirmed",
+        Reservation.jam_mulai < jam_selesai,
+        Reservation.jam_selesai > jam_mulai
+    ).all()
+
+    occupied_ids = [r.space_id for r in overlapping]
+    return JSONResponse({"occupied_space_ids": occupied_ids})
+
+
+# 2. Endpoint Konfirmasi Pembayaran (Mengubah status pending -> confirmed agar ruangan jadi MERAH)
+@router.post("/reservations/{reservation_id}/pay")
+def pay_reservation(reservation_id: int, db: Session = Depends(get_db)):
+    reservation = db.query(Reservation).filter(Reservation.id == reservation_id).first()
+    if reservation and reservation.status == "pending":
+        # Cek ulang apakah ruangan sudah dibayar orang lain di jam yang sama
+        conflict = db.query(Reservation).filter(
+            Reservation.id != reservation.id,
+            Reservation.space_id == reservation.space_id,
+            Reservation.tanggal == reservation.tanggal,
+            Reservation.status == "confirmed",
+            Reservation.jam_mulai < reservation.jam_selesai,
+            Reservation.jam_selesai > reservation.jam_mulai
+        ).first()
+
+        if conflict:
+            return RedirectResponse(
+                url="/dashboard?error=Maaf,+ruangan+baru+saja+dibayar+pengguna+lain+di+jam+tersebut",
+                status_code=303
+            )
+
+        reservation.status = "confirmed"
+        db.commit()
+
+    return RedirectResponse(
+        url="/dashboard?msg=Pembayaran+berhasil!+Ruangan+telah+terkunci+untuk+Anda",
+        status_code=303
+    )
+
 @router.post("/create")
 def create_reservation(
     space_id: int = Form(...),
