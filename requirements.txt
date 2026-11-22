@@ -6,7 +6,6 @@ jinja2
 python-multipart
 pyjwt
 bcrypt==4.0.1
-python-dotenv
+passlib[bcrypt]
 itsdangerous
 python-dotenv
-passlib[bcrypt]
