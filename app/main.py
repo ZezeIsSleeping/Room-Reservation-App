@@ -11,12 +11,6 @@ from app.routers import auth_router, dashboard_router, spaces_router, reservatio
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-try:
-    Base.metadata.create_all(bind=engine)
-    seed_initial_data()
-except Exception as e:
-    print(f"Database init warning: {e}")
-
 def seed_initial_data():
     db = SessionLocal()
     try:
@@ -51,6 +45,13 @@ def seed_initial_data():
         db.commit()
     finally:
         db.close()
+
+# Jalankan pembuatan tabel & seeding setelah fungsi seed_initial_data didefinisikan
+try:
+    Base.metadata.create_all(bind=engine)
+    seed_initial_data()
+except Exception as e:
+    print(f"Database init warning: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
