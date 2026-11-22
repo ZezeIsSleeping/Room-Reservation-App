@@ -11,6 +11,9 @@
 <!-- Overlay gelap tipis agar teks tetap jelas -->
 <div class="fixed inset-0 bg-slate-950/40 -z-10"></div>
 
+{% set alert_msg = msg or (request.query_params.get('msg') if request else None) %}
+{% set alert_err = error or (request.query_params.get('error') or request.query_params.get('err') if request else None) %}
+
 <!-- Container Utama -->
 <div class="min-h-screen flex items-center justify-center px-4 py-12">
     <!-- Card Glassmorphism (Frost lebih tipis & transparan) -->
@@ -23,30 +26,23 @@
 
         <p class="text-center text-white/80 text-sm mb-6">Masuk ke sistem reservasi co-working space</p>
 
-        <!-- Notifikasi pesan (misal: Berhasil logout) -->
-        {% set alert_msg = msg or (request.query_params.get('msg') if request else None) %}
+        <!-- Notifikasi pesan sukses (misal: Berhasil logout / registrasi) -->
         {% if alert_msg %}
         <div class="mb-4 p-3 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-100 text-xs text-center">
             {{ alert_msg }}
         </div>
         {% endif %}
 
-        {% if error %}
-        <div class="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-400/30 text-red-100 text-xs text-center">
-            {{ error }}
-        </div>
-        {% endif %}
-
         <form method="post" action="/login" class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-white/90 mb-1.5">Email</label>
-                <input type="email" name="email" placeholder="nama@email.com" required 
-                    class="w-full bg-white/5 border border-white/20 rounded-xl px-3.5 py-2.5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/60 focus:bg-white/10 transition">
+                <input type="email" id="login-email" name="email" placeholder="nama@email.com" required 
+                    class="w-full bg-white/5 border {% if alert_err %}border-rose-400/60{% else %}border-white/20{% endif %} rounded-xl px-3.5 py-2.5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/60 focus:bg-white/10 transition">
             </div>
             <div>
                 <label class="block text-sm font-medium text-white/90 mb-1.5">Password</label>
-                <input type="password" name="password" placeholder="••••••••" required 
-                    class="w-full bg-white/5 border border-white/20 rounded-xl px-3.5 py-2.5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/60 focus:bg-white/10 transition">
+                <input type="password" id="login-password" name="password" placeholder="••••••••" required 
+                    class="w-full bg-white/5 border {% if alert_err %}border-rose-400/60{% else %}border-white/20{% endif %} rounded-xl px-3.5 py-2.5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/60 focus:bg-white/10 transition">
             </div>
             <button type="submit" 
                 class="w-full bg-black/80 hover:bg-black border border-white/25 text-white font-semibold py-2.5 rounded-xl shadow-lg transition duration-200 cursor-pointer mt-2">
@@ -57,13 +53,67 @@
         <p class="text-center text-sm text-white/80 mt-5">
             Belum punya akun? <a href="/register" class="text-white font-semibold underline decoration-white/50 hover:decoration-white">Daftar di sini</a>
         </p>
+    </div>
+</div>
 
-        <!-- Kotak Akun Demo -->
-        <div class="mt-6 p-3.5 bg-black/25 rounded-2xl border border-white/15 text-xs text-white/85 space-y-1">
-            <p class="font-semibold text-white mb-1">Akun Demo Bawaan:</p>
-            <p>Admin: <code class="bg-white/15 px-1.5 py-0.5 rounded text-white">admin@coworking.com</code> / <code class="bg-white/15 px-1.5 py-0.5 rounded text-white">admin123</code></p>
-            <p>User: <code class="bg-white/15 px-1.5 py-0.5 rounded text-white">user@coworking.com</code> / <code class="bg-white/15 px-1.5 py-0.5 rounded text-white">user123</code></p>
+<!-- POP-UP MODAL ERROR MERAH (Muncul otomatis jika email atau password salah) -->
+{% if alert_err %}
+<div id="login-error-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+    <div class="relative w-full max-w-sm bg-gradient-to-b from-rose-950/95 to-[#18090d]/95 border border-rose-500/50 ring-1 ring-inset ring-rose-400/20 rounded-3xl p-6 shadow-[0_0_50px_rgba(244,63,94,0.3)] text-center space-y-4">
+        
+        <!-- Tombol Close Pojok Kanan Atas -->
+        <button type="button" onclick="closeErrorModal()" aria-label="Tutup"
+            class="absolute top-4 right-4 w-8 h-8 rounded-full bg-rose-500/15 hover:bg-rose-500/30 border border-rose-400/25 text-rose-200 hover:text-white flex items-center justify-center transition cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <!-- Ikon Peringatan Merah -->
+        <div class="mx-auto w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-rose-400 shadow-inner">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+            </svg>
+        </div>
+
+        <!-- Pesan Error -->
+        <div class="space-y-1.5">
+            <h3 class="text-lg font-bold text-white">Login Gagal</h3>
+            <p class="text-xs text-rose-200/90 leading-relaxed">{{ alert_err }}</p>
+        </div>
+
+        <!-- Tombol Tutup / Coba Lagi -->
+        <div class="pt-2">
+            <button type="button" onclick="closeErrorModal()"
+                class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 border border-rose-400/40 text-xs font-semibold text-white shadow-lg shadow-rose-950/50 transition cursor-pointer">
+                Coba Lagi
+            </button>
         </div>
     </div>
 </div>
+
+<script>
+    const errorModal = document.getElementById('login-error-modal');
+
+    function closeErrorModal() {
+        if (!errorModal) return;
+        errorModal.classList.add('hidden');
+        errorModal.classList.remove('flex');
+        const emailInput = document.getElementById('login-email');
+        if (emailInput) emailInput.focus();
+    }
+
+    // Tutup modal jika klik area gelap di luar kotak atau tekan Esc
+    if (errorModal) {
+        errorModal.addEventListener('click', function(e) {
+            if (e.target === errorModal) closeErrorModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !errorModal.classList.contains('hidden')) {
+                closeErrorModal();
+            }
+        });
+    }
+</script>
+{% endif %}
 {% endblock %}

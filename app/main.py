@@ -7,25 +7,11 @@ from app.models import User, Space
 from app.auth import hash_password
 from app.routers import auth_router, dashboard_router, spaces_router, reservations_router, reports_router
 
+Base.metadata.create_all(bind=engine)
+
 def seed_initial_data():
     db = SessionLocal()
     try:
-        # Buat akun Admin & User bawaan jika belum ada
-        if not db.query(User).filter(User.email == "admin@coworking.com").first():
-            db.add(User(
-                nama="Administrator",
-                email="admin@coworking.com",
-                password_hash=hash_password("admin123"),
-                role="admin"
-            ))
-        if not db.query(User).filter(User.email == "user@coworking.com").first():
-            db.add(User(
-                nama="Budi Santoso",
-                email="user@coworking.com",
-                password_hash=hash_password("user123"),
-                role="user"
-            ))
-
         # Buat 3 pilihan ruangan sesuai spesifikasi baru jika tabel spaces kosong
         if db.query(Space).count() == 0:
             db.add_all([

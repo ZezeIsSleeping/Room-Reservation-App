@@ -1,5 +1,6 @@
 # Environment & Secret Keys
 .env
+akun_demo.txt
 
 # Python & Virtual Environment
 venv/
