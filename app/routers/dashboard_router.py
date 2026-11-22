@@ -7,9 +7,11 @@ from app.database import get_db
 from app.models import User, Space, Reservation
 from app.auth import require_user
 from app.routers.reservations_router import get_max_stock
+from pathlib import Path
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @router.get("/dashboard")
 def dashboard(

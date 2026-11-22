@@ -4,10 +4,12 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
+from pathlib import Path
 from app.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @router.get("/login")
 def login_page(request: Request, user: User | None = Depends(get_current_user)):

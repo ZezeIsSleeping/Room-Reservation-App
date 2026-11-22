@@ -6,9 +6,11 @@ from sqlalchemy.exc import IntegrityError
 from app.database import get_db
 from app.models import Space, User
 from app.auth import require_admin
+from pathlib import Path
 
 router = APIRouter(prefix="/spaces")
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 @router.get("")
 def list_spaces(
