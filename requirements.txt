@@ -7,3 +7,6 @@ python-multipart
 pyjwt
 bcrypt
 python-dotenv
+itsdangerous
+python-dotenv
+passlib[bcrypt]
