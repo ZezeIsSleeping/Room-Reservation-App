@@ -1,79 +1,280 @@
 {% extends "base.html" %}
+
+{% block body_class %}bg-black text-zinc-100 min-h-screen antialiased{% endblock %}
+
+{% block navbar %}{% endblock %}
+
 {% block content %}
-<h1 class="text-2xl font-bold mb-6">File Master: Kelola Spaces</h1>
+{% set current_admin = user if user is defined else (admin if admin is defined else None) %}
+{% set active_count = spaces | selectattr('is_active') | list | length %}
 
-<div class="bg-white rounded-xl shadow p-6 mb-8">
-    <h2 class="font-bold text-lg mb-4">Tambah Space Baru</h2>
-    <form method="post" action="/spaces/create" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+<div class="min-h-screen flex flex-col lg:flex-row bg-black">
+
+    <!-- SIDEBAR NAVIGASI HITAM SOLID -->
+    <aside class="w-full lg:w-64 flex-shrink-0 bg-zinc-950 border-b lg:border-b-0 lg:border-r border-zinc-800 p-5 flex flex-col justify-between">
         <div>
-            <label class="block text-xs font-semibold mb-1">Nama Space</label>
-            <input type="text" name="nama_space" required placeholder="Contoh: Ruang Bromo" class="w-full border rounded px-3 py-2 text-sm">
+            <!-- Logo di Tengah -->
+            <div class="flex flex-col items-center justify-center pb-5 border-b border-zinc-800">
+                <img src="/assets/Logo.png" alt="CoWorkSpace Logo" class="h-11 w-auto object-contain">
+                <span class="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 rounded-md">
+                    Admin Panel
+                </span>
+            </div>
+
+            <!-- Menu Navigasi Utama -->
+            <nav class="mt-6 space-y-1.5 text-sm">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Menu Utama</p>
+
+                <a href="/dashboard"
+                    class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Dashboard
+                </a>
+
+                <a href="/spaces"
+                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/80 text-white font-medium transition">
+                    <span class="flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        Kelola Ruangan
+                    </span>
+                    <span class="text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-md">{{ spaces|length }}</span>
+                </a>
+
+                <a href="/reports"
+                    class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Laporan Keuangan
+                </a>
+            </nav>
+
+            <!-- Pintasan Navigasi Halaman -->
+            <div class="mt-6 pt-5 border-t border-zinc-800/80 space-y-1.5 text-sm">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Pintasan Halaman</p>
+                <a href="#form-tambah"
+                    class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition text-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                    Tambah Space Baru
+                </a>
+                <a href="#daftar-spaces"
+                    class="flex items-center justify-between px-3.5 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition text-xs">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        Ruangan Aktif
+                    </span>
+                    <span class="bg-emerald-950 border border-emerald-800/60 text-emerald-300 px-2 py-0.5 rounded-md font-semibold">
+                        {{ active_count }}
+                    </span>
+                </a>
+            </div>
         </div>
-        <div>
-            <label class="block text-xs font-semibold mb-1">Tipe</label>
-            <select name="tipe" class="w-full border rounded px-3 py-2 text-sm">
-                <option value="Hot Desk">Hot Desk</option>
-                <option value="Meeting Room">Meeting Room</option>
-                <option value="Private Office">Private Office</option>
-            </select>
+
+        <!-- Profil Admin & Logout -->
+        <div class="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between gap-2">
+            <div class="truncate">
+                <p class="text-xs font-semibold text-white truncate">{{ current_admin.nama or current_admin.email if current_admin else 'Administrator' }}</p>
+                <p class="text-[11px] text-zinc-500 truncate">{{ current_admin.email if current_admin else '' }}</p>
+            </div>
+            <a href="/logout"
+                class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-950 border border-zinc-800 hover:border-rose-800 text-zinc-300 hover:text-rose-200 text-xs font-medium transition flex-shrink-0">
+                Logout
+            </a>
         </div>
-        <div>
-            <label class="block text-xs font-semibold mb-1">Kapasitas</label>
-            <input type="number" name="kapasitas" required min="1" value="1" class="w-full border rounded px-3 py-2 text-sm">
+    </aside>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 min-w-0 p-4 md:p-8 max-w-[1440px] mx-auto w-full space-y-6">
+
+        <!-- Notifikasi Alert -->
+        {% set alert_msg = msg or (request.query_params.get('msg') if request else None) %}
+        {% set alert_err = error or (request.query_params.get('error') or request.query_params.get('err') if request else None) %}
+        {% if alert_msg %}
+        <div class="p-4 rounded-xl bg-emerald-950 border border-emerald-800 text-emerald-200 text-xs">
+            {{ alert_msg }}
         </div>
-        <div>
-            <label class="block text-xs font-semibold mb-1">Harga / Jam (Rp)</label>
-            <input type="number" name="harga_per_jam" required min="1000" step="1000" class="w-full border rounded px-3 py-2 text-sm">
+        {% endif %}
+        {% if alert_err %}
+        <div class="p-4 rounded-xl bg-rose-950 border border-rose-800 text-rose-200 text-xs">
+            {{ alert_err }}
         </div>
-        <div>
-            <label class="block text-xs font-semibold mb-1">Fasilitas</label>
-            <input type="text" name="fasilitas" required placeholder="WiFi, AC, Proyektor" class="w-full border rounded px-3 py-2 text-sm">
+        {% endif %}
+
+        <!-- Header Halaman -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">File Master: Kelola Spaces</h1>
+                <p class="text-xs text-zinc-400 mt-1">Tambah kategori ruangan baru, atur tarif sewa per jam, dan kelola status ketersediaan</p>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <a href="/dashboard"
+                    class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-semibold transition">
+                    &larr; Dashboard
+                </a>
+            </div>
         </div>
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded text-sm">
-            + Tambah
-        </button>
-    </form>
+
+        <!-- CARD 1: FORM TAMBAH SPACE BARU -->
+        <div id="form-tambah" class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6">
+            <div class="mb-5">
+                <h2 class="font-bold text-base text-white">Tambah Space Baru</h2>
+                <p class="text-xs text-zinc-500 mt-0.5">Lengkapi detail spesifikasi ruangan untuk ditampilkan pada katalog pengguna</p>
+            </div>
+
+            <form method="post" action="/spaces/create" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">Nama Space</label>
+                    <input type="text" name="nama_space" required placeholder="Contoh: Executive VIP"
+                        class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">Tipe</label>
+                    <select name="tipe"
+                        class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none transition cursor-pointer">
+                        <option value="Essential">Essential</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Executive">Executive</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">Kapasitas (Org)</label>
+                    <input type="number" name="kapasitas" required min="1" value="4"
+                        class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">Harga / Jam (Rp)</label>
+                    <input type="number" name="harga_per_jam" required min="1000" step="1000" placeholder="50000"
+                        class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-1.5">Fasilitas</label>
+                    <input type="text" name="fasilitas" required placeholder="AC, Ruangan Kedap, WiFi 50Mb/s"
+                        class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none transition">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-white hover:bg-zinc-200 text-black font-semibold py-2.5 px-4 rounded-xl text-xs transition cursor-pointer">
+                    + Tambah Space
+                </button>
+            </form>
+        </div>
+
+        <!-- CARD 2: TABEL DAFTAR SPACES -->
+        <div id="daftar-spaces" class="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div class="p-5 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-base text-white">Daftar Master Ruangan</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Total {{ spaces|length }} ruangan terdaftar ({{ active_count }} aktif)</p>
+                </div>
+
+                <!-- Pencarian Cepat -->
+                <div class="relative">
+                    <input type="text" id="search-space" onkeyup="filterSpaces()" placeholder="Cari nama, tipe, fasilitas..."
+                        class="w-full sm:w-64 bg-black border border-zinc-800 focus:border-zinc-600 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none">
+                    <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-zinc-900/90 text-zinc-400 uppercase text-[11px] tracking-wider border-b border-zinc-800">
+                        <tr>
+                            <th class="px-5 py-3.5">ID</th>
+                            <th class="px-5 py-3.5">Nama Space</th>
+                            <th class="px-5 py-3.5">Tipe</th>
+                            <th class="px-5 py-3.5">Kapasitas</th>
+                            <th class="px-5 py-3.5">Harga / Jam</th>
+                            <th class="px-5 py-3.5">Fasilitas</th>
+                            <th class="px-5 py-3.5">Status</th>
+                            <th class="px-5 py-3.5 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800/80 text-xs">
+                        {% for sp in spaces %}
+                        <tr class="space-row hover:bg-zinc-900/60 transition"
+                            data-search="#{{ sp.id }} {{ sp.nama_space }} {{ sp.tipe }} {{ sp.fasilitas }}">
+                            <td class="px-5 py-3.5 font-mono text-zinc-400">#{{ sp.id }}</td>
+                            <td class="px-5 py-3.5 font-semibold text-white">{{ sp.nama_space }}</td>
+                            <td class="px-5 py-3.5">
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold border
+                                    {% if 'executive' in (sp.tipe or '')|lower %}bg-amber-950 text-amber-300 border-amber-800/70
+                                    {% elif 'premium' in (sp.tipe or '')|lower %}bg-cyan-950 text-cyan-300 border-cyan-800/70
+                                    {% else %}bg-zinc-900 text-zinc-300 border-zinc-700{% endif %}">
+                                    {{ sp.tipe }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ sp.kapasitas }} org</td>
+                            <td class="px-5 py-3.5 font-semibold text-white">Rp {{ "{:,.0f}".format(sp.harga_per_jam) }}</td>
+                            <td class="px-5 py-3.5 text-zinc-400 max-w-xs">{{ sp.fasilitas }}</td>
+                            <td class="px-5 py-3.5">
+                                {% if sp.is_active %}
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800/70">
+                                    Aktif
+                                </span>
+                                {% else %}
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
+                                    Nonaktif
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-5 py-3.5">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/spaces/{{ sp.id }}/edit"
+                                        class="bg-zinc-800 hover:bg-amber-600 border border-zinc-700 hover:border-amber-500 text-zinc-200 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                        Edit
+                                    </a>
+                                    <form method="post" action="/spaces/{{ sp.id }}/delete" onsubmit="return confirm('Hapus ruangan ini?')">
+                                        <button type="submit"
+                                            class="bg-zinc-900 hover:bg-rose-600 border border-zinc-800 hover:border-rose-500 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="px-5 py-8 text-center text-zinc-500">Belum ada data ruangan.</td>
+                        </tr>
+                        {% endfor %}
+                        <tr id="empty-space-row" class="hidden">
+                            <td colspan="8" class="px-5 py-8 text-center text-zinc-500">Tidak ada ruangan yang cocok dengan pencarian.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
 </div>
 
-<div class="bg-white rounded-xl shadow overflow-hidden">
-    <table class="w-full text-sm text-left">
-        <thead class="bg-slate-50 text-slate-600 uppercase text-xs">
-            <tr>
-                <th class="px-4 py-3">ID</th>
-                <th class="px-4 py-3">Nama Space</th>
-                <th class="px-4 py-3">Tipe</th>
-                <th class="px-4 py-3">Kapasitas</th>
-                <th class="px-4 py-3">Harga/Jam</th>
-                <th class="px-4 py-3">Fasilitas</th>
-                <th class="px-4 py-3">Status</th>
-                <th class="px-4 py-3">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y">
-            {% for sp in spaces %}
-            <tr>
-                <td class="px-4 py-3">{{ sp.id }}</td>
-                <td class="px-4 py-3 font-semibold">{{ sp.nama_space }}</td>
-                <td class="px-4 py-3">{{ sp.tipe }}</td>
-                <td class="px-4 py-3">{{ sp.kapasitas }} org</td>
-                <td class="px-4 py-3">Rp {{ "{:,.0f}".format(sp.harga_per_jam) }}</td>
-                <td class="px-4 py-3">{{ sp.fasilitas }}</td>
-                <td class="px-4 py-3">
-                    {% if sp.is_active %}
-                    <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs">Aktif</span>
-                    {% else %}
-                    <span class="bg-slate-200 text-slate-600 px-2 py-1 rounded text-xs">Nonaktif</span>
-                    {% endif %}
-                </td>
-                <td class="px-4 py-3 flex space-x-2">
-                    <a href="/spaces/{{ sp.id }}/edit" class="bg-amber-500 text-white px-3 py-1 rounded text-xs hover:bg-amber-600">Edit</a>
-                    <form method="post" action="/spaces/{{ sp.id }}/delete" onsubmit="return confirm('Hapus ruangan ini?')">
-                        <button class="bg-rose-600 text-white px-3 py-1 rounded text-xs hover:bg-rose-700">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<script>
+    function filterSpaces() {
+        const keyword = (document.getElementById('search-space').value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.space-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = (row.dataset.search || '').toLowerCase();
+            const match = !keyword || text.includes(keyword);
+            row.classList.toggle('hidden', !match);
+            if (match) visibleCount++;
+        });
+
+        const emptyRow = document.getElementById('empty-space-row');
+        if (emptyRow && rows.length > 0) {
+            emptyRow.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+</script>
 {% endblock %}

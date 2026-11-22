@@ -1,91 +1,274 @@
 {% extends "base.html" %}
+
+{% block body_class %}bg-black text-zinc-100 min-h-screen antialiased{% endblock %}
+
+{% block navbar %}{% endblock %}
+
 {% block content %}
-<div class="flex flex-wrap justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Laporan Okupansi & Transaksi Co-Working</h1>
-    <div class="flex space-x-2 no-print">
-        <a href="/reports/export-csv?start_date={{ start_date }}&end_date={{ end_date }}"
-           class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
-            Download CSV
-        </a>
-        <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold">
-            Cetak / PDF
-        </button>
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body, .print-container {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+        .print-card {
+            background: #ffffff !important;
+            border: 1px solid #d4d4d8 !important;
+            color: #000000 !important;
+        }
+        .print-card th, .print-card td, .print-card div, .print-card span, .print-title {
+            color: #000000 !important;
+            background: transparent !important;
+        }
+    }
+</style>
+
+{% set current_admin = user if user is defined else (admin if admin is defined else None) %}
+
+<div class="min-h-screen flex flex-col lg:flex-row bg-black print-container">
+
+    <!-- SIDEBAR NAVIGASI HITAM SOLID -->
+    <aside class="no-print w-full lg:w-64 flex-shrink-0 bg-zinc-950 border-b lg:border-b-0 lg:border-r border-zinc-800 p-5 flex flex-col justify-between">
+        <div>
+            <!-- Logo di Tengah -->
+            <div class="flex flex-col items-center justify-center pb-5 border-b border-zinc-800">
+                <img src="/assets/Logo.png" alt="CoWorkSpace Logo" class="h-11 w-auto object-contain">
+                <span class="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 rounded-md">
+                    Admin Panel
+                </span>
+            </div>
+
+            <!-- Menu Navigasi Utama -->
+            <nav class="mt-6 space-y-1.5 text-sm">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Menu Utama</p>
+
+                <a href="/dashboard"
+                    class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Dashboard
+                </a>
+
+                <a href="/spaces"
+                    class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    Kelola Ruangan
+                </a>
+
+                <a href="/reports"
+                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/80 text-white font-medium transition">
+                    <span class="flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Laporan Keuangan
+                    </span>
+                </a>
+            </nav>
+
+            <!-- Pintasan Navigasi Halaman -->
+            <div class="mt-6 pt-5 border-t border-zinc-800/80 space-y-1.5 text-sm">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Bagian Laporan</p>
+                <a href="#rekap-space"
+                    class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition text-xs">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Rekap per Ruangan
+                </a>
+                <a href="#rincian-transaksi"
+                    class="flex items-center justify-between px-3.5 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition text-xs">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
+                        Rincian Transaksi
+                    </span>
+                    <span class="bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-md">{{ transaksi|length }}</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Profil Admin & Logout -->
+        <div class="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between gap-2">
+            <div class="truncate">
+                <p class="text-xs font-semibold text-white truncate">{{ current_admin.nama or current_admin.email if current_admin else 'Administrator' }}</p>
+                <p class="text-[11px] text-zinc-500 truncate">{{ current_admin.email if current_admin else '' }}</p>
+            </div>
+            <a href="/logout"
+                class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-950 border border-zinc-800 hover:border-rose-800 text-zinc-300 hover:text-rose-200 text-xs font-medium transition flex-shrink-0">
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 min-w-0 p-4 md:p-8 max-w-[1440px] mx-auto w-full space-y-6">
+
+        <!-- Header & Tombol Ekspor -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+            <div>
+                <h1 class="print-title text-2xl font-bold text-white tracking-tight">Laporan Okupansi & Transaksi Co-Working</h1>
+                <p class="text-xs text-zinc-400 mt-1">
+                    Periode: <span class="text-zinc-200 font-medium">{{ start_date }}</span> s/d <span class="text-zinc-200 font-medium">{{ end_date }}</span>
+                </p>
+            </div>
+            <div class="flex items-center gap-2.5 no-print">
+                <a href="/reports/export-csv?start_date={{ start_date }}&end_date={{ end_date }}"
+                    class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download CSV
+                </a>
+                <button type="button" onclick="window.print()"
+                    class="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-100 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Cetak / PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Periode -->
+        <form method="get" action="/reports" class="no-print bg-zinc-950 border border-zinc-800 p-5 rounded-2xl flex flex-wrap gap-4 items-end">
+            <div>
+                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Dari Tanggal</label>
+                <input type="date" name="start_date" value="{{ start_date }}"
+                    onclick="try{this.showPicker()}catch(e){}"
+                    class="bg-black border border-zinc-800 focus:border-zinc-600 rounded-xl px-3.5 py-2 text-xs text-white [color-scheme:dark] focus:outline-none cursor-pointer">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-zinc-400 mb-1.5">Sampai Tanggal</label>
+                <input type="date" name="end_date" value="{{ end_date }}"
+                    onclick="try{this.showPicker()}catch(e){}"
+                    class="bg-black border border-zinc-800 focus:border-zinc-600 rounded-xl px-3.5 py-2 text-xs text-white [color-scheme:dark] focus:outline-none cursor-pointer">
+            </div>
+            <div class="flex items-center gap-3">
+                <button type="submit" class="bg-white hover:bg-zinc-200 text-black px-5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer">
+                    Filter Periode
+                </button>
+                <a href="/reports" class="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-zinc-300 hover:text-white transition">
+                    Reset
+                </a>
+            </div>
+        </form>
+
+        <!-- Rekap Per Ruangan -->
+        <div id="rekap-space" class="print-card bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div class="p-5 border-b border-zinc-800 flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-base text-white">Rekapitulasi Pendapatan per Space</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Hanya menghitung transaksi dengan status Confirmed</p>
+                </div>
+                <span class="no-print text-[11px] font-semibold px-2.5 py-1 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-800/70">
+                    Confirmed Only
+                </span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-zinc-900/90 text-zinc-400 text-[11px] uppercase tracking-wider border-b border-zinc-800">
+                        <tr>
+                            <th class="px-5 py-3.5">Nama Space</th>
+                            <th class="px-5 py-3.5">Tipe</th>
+                            <th class="px-5 py-3.5">Jumlah Booking</th>
+                            <th class="px-5 py-3.5">Total Jam Terpakai</th>
+                            <th class="px-5 py-3.5 text-right">Total Pendapatan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800/80 text-xs">
+                        {% for item in rekap_spaces %}
+                        <tr class="hover:bg-zinc-900/60 transition">
+                            <td class="px-5 py-3.5 font-semibold text-white">{{ item.nama_space }}</td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ item.tipe }}</td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ item.jumlah_booking }}x</td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ item.total_jam }} Jam</td>
+                            <td class="px-5 py-3.5 text-right font-semibold text-emerald-400">Rp {{ "{:,.0f}".format(item.total_pendapatan) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="px-5 py-8 text-center text-zinc-500">Tidak ada data rekap pada periode ini.</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="bg-zinc-900 font-bold border-t border-zinc-700">
+                            <td colspan="4" class="px-5 py-4 text-right text-zinc-300 tracking-wide">GRAND TOTAL PENDAPATAN:</td>
+                            <td class="px-5 py-4 text-right text-sm text-emerald-400">Rp {{ "{:,.0f}".format(grand_total) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detail Transaksi -->
+        <div id="rincian-transaksi" class="print-card bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div class="p-5 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-base text-white">Rincian Seluruh Transaksi</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Daftar lengkap riwayat pemesanan dalam periode terpilih</p>
+                </div>
+                <div class="relative no-print">
+                    <input type="text" id="search-report" onkeyup="filterReportRows()" placeholder="Cari penyewa, ruangan, status..."
+                        class="w-full sm:w-60 bg-black border border-zinc-800 focus:border-zinc-600 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none">
+                    <svg class="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-zinc-900/90 text-zinc-400 text-[11px] uppercase tracking-wider border-b border-zinc-800">
+                        <tr>
+                            <th class="px-5 py-3.5">ID</th>
+                            <th class="px-5 py-3.5">Tanggal</th>
+                            <th class="px-5 py-3.5">Penyewa</th>
+                            <th class="px-5 py-3.5">Ruangan</th>
+                            <th class="px-5 py-3.5">Waktu</th>
+                            <th class="px-5 py-3.5">Biaya</th>
+                            <th class="px-5 py-3.5">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800/80 text-xs">
+                        {% for t in transaksi %}
+                        <tr class="report-row hover:bg-zinc-900/60 transition"
+                            data-search="#{{ t.id }} {{ t.tanggal }} {{ t.user.nama }} {{ t.space.nama_space }} {{ t.status }}">
+                            <td class="px-5 py-3.5 font-mono text-zinc-400">#{{ t.id }}</td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ t.tanggal }}</td>
+                            <td class="px-5 py-3.5 font-semibold text-white">{{ t.user.nama }}</td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ t.space.nama_space }}</td>
+                            <td class="px-5 py-3.5 text-zinc-300">{{ t.jam_mulai.strftime('%H:%M') }} - {{ t.jam_selesai.strftime('%H:%M') }}</td>
+                            <td class="px-5 py-3.5 font-semibold text-white">Rp {{ "{:,.0f}".format(t.total_bayar) }}</td>
+                            <td class="px-5 py-3.5">
+                                <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase border
+                                    {% if t.status == 'confirmed' %}bg-emerald-950 text-emerald-300 border-emerald-800/70
+                                    {% elif t.status == 'cancelled' %}bg-rose-950 text-rose-300 border-rose-800/70
+                                    {% else %}bg-amber-950 text-amber-300 border-amber-800/70{% endif %}">
+                                    {{ t.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="px-5 py-8 text-center text-zinc-500">Belum ada data transaksi pada periode ini.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- Filter Periode -->
-<form method="get" action="/reports" class="bg-white p-4 rounded-xl shadow mb-6 flex flex-wrap gap-4 items-end no-print">
-    <div>
-        <label class="block text-xs font-semibold mb-1">Dari Tanggal</label>
-        <input type="date" name="start_date" value="{{ start_date }}" class="border rounded px-3 py-1.5 text-sm">
-    </div>
-    <div>
-        <label class="block text-xs font-semibold mb-1">Sampai Tanggal</label>
-        <input type="date" name="end_date" value="{{ end_date }}" class="border rounded px-3 py-1.5 text-sm">
-    </div>
-    <button type="submit" class="bg-indigo-600 text-white px-4 py-1.5 rounded text-sm font-semibold">Filter</button>
-    <a href="/reports" class="text-sm text-slate-500 underline py-1.5">Reset</a>
-</form>
-
-<!-- Rekap Per Ruangan -->
-<div class="bg-white rounded-xl shadow overflow-hidden mb-8">
-    <div class="p-4 border-b bg-slate-50 font-bold">Rekapitulasi Pendapatan per Space (Status: Confirmed)</div>
-    <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 text-xs uppercase">
-            <tr>
-                <th class="px-4 py-3">Nama Space</th>
-                <th class="px-4 py-3">Tipe</th>
-                <th class="px-4 py-3">Jumlah Booking</th>
-                <th class="px-4 py-3">Total Jam Terpakai</th>
-                <th class="px-4 py-3">Total Pendapatan</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y">
-            {% for item in rekap_spaces %}
-            <tr>
-                <td class="px-4 py-3 font-semibold">{{ item.nama_space }}</td>
-                <td class="px-4 py-3">{{ item.tipe }}</td>
-                <td class="px-4 py-3">{{ item.jumlah_booking }}x</td>
-                <td class="px-4 py-3">{{ item.total_jam }} Jam</td>
-                <td class="px-4 py-3 font-semibold text-emerald-700">Rp {{ "{:,.0f}".format(item.total_pendapatan) }}</td>
-            </tr>
-            {% endfor %}
-            <tr class="bg-indigo-50 font-bold">
-                <td colspan="4" class="px-4 py-3 text-right">GRAND TOTAL PENDAPATAN:</td>
-                <td class="px-4 py-3 text-indigo-700">Rp {{ "{:,.0f}".format(grand_total) }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- Detail Transaksi -->
-<div class="bg-white rounded-xl shadow overflow-hidden">
-    <div class="p-4 border-b bg-slate-50 font-bold">Rincian Seluruh Transaksi</div>
-    <table class="w-full text-sm text-left">
-        <thead class="bg-slate-100 text-xs uppercase">
-            <tr>
-                <th class="px-4 py-3">ID</th>
-                <th class="px-4 py-3">Tanggal</th>
-                <th class="px-4 py-3">Penyewa</th>
-                <th class="px-4 py-3">Ruangan</th>
-                <th class="px-4 py-3">Waktu</th>
-                <th class="px-4 py-3">Biaya</th>
-                <th class="px-4 py-3">Status</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y">
-            {% for t in transaksi %}
-            <tr>
-                <td class="px-4 py-3">#{{ t.id }}</td>
-                <td class="px-4 py-3">{{ t.tanggal }}</td>
-                <td class="px-4 py-3">{{ t.user.nama }}</td>
-                <td class="px-4 py-3">{{ t.space.nama_space }}</td>
-                <td class="px-4 py-3">{{ t.jam_mulai.strftime('%H:%M') }} - {{ t.jam_selesai.strftime('%H:%M') }}</td>
-                <td class="px-4 py-3">Rp {{ "{:,.0f}".format(t.total_bayar) }}</td>
-                <td class="px-4 py-3 uppercase text-xs font-semibold">{{ t.status }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<script>
+    function filterReportRows() {
+        const keyword = (document.getElementById('search-report').value || '').toLowerCase().trim();
+        document.querySelectorAll('.report-row').forEach(row => {
+            const text = (row.dataset.search || '').toLowerCase();
+            row.classList.toggle('hidden', keyword && !text.includes(keyword));
+        });
+    }
+</script>
 {% endblock %}

@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -5,6 +6,7 @@ from sqlalchemy import func
 from app.database import get_db
 from app.models import User, Space, Reservation
 from app.auth import require_user
+from app.routers.reservations_router import get_max_stock
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -42,12 +44,24 @@ def dashboard(
         Reservation.user_id == user.id
     ).order_by(Reservation.created_at.desc()).all()
 
+    # Hitung sisa stok hari ini dari pesanan yang sudah di-ACC admin (status == 'confirmed')
+    today = date.today()
+    stock_map = {}
+    for sp in spaces:
+        booked_confirmed = db.query(Reservation).filter(
+            Reservation.space_id == sp.id,
+            Reservation.tanggal == today,
+            Reservation.status == "confirmed"
+        ).count()
+        stock_map[sp.id] = max(0, get_max_stock(sp) - booked_confirmed)
+
     return templates.TemplateResponse(
         request=request,
         name="dashboard_user.html",
         context={
             "user": user,
             "spaces": spaces,
-            "reservations": my_reservations
+            "reservations": my_reservations,
+            "stock_map": stock_map
         }
     )

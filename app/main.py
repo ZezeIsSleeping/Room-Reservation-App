@@ -26,31 +26,31 @@ def seed_initial_data():
                 role="user"
             ))
 
-        # Buat 3 contoh ruangan jika tabel spaces kosong
+        # Buat 3 pilihan ruangan sesuai spesifikasi baru jika tabel spaces kosong
         if db.query(Space).count() == 0:
             db.add_all([
                 Space(
-                    nama_space="Alpha Hot Desk",
-                    tipe="Hot Desk",
-                    kapasitas=1,
-                    harga_per_jam=25000,
-                    fasilitas="WiFi 100Mbps, Stopkontak, Free Kopi/Teh",
-                    is_active=True
-                ),
-                Space(
-                    nama_space="Nusantara Meeting Room",
-                    tipe="Meeting Room",
-                    kapasitas=8,
-                    harga_per_jam=120000,
-                    fasilitas="Smart TV 55\", Whiteboard, AC, WiFi",
-                    is_active=True
-                ),
-                Space(
-                    nama_space="Garuda Private Office",
-                    tipe="Private Office",
+                    nama_space="Essential",
+                    tipe="Essential",
                     kapasitas=4,
-                    harga_per_jam=90000,
-                    fasilitas="Ruang Kedap Suara, Meja Eksekutif, Loker",
+                    harga_per_jam=50000,
+                    fasilitas="Ukuran 3,5x3,5m, AC, Ruangan Kedap, WiFi 50Mb/s",
+                    is_active=True
+                ),
+                Space(
+                    nama_space="Premium",
+                    tipe="Premium",
+                    kapasitas=9,
+                    harga_per_jam=100000,
+                    fasilitas="Ukuran 6x6m, AC, Ruangan Kedap, Papan Tulis Kaca, View Danau, WiFi 80Mb/s",
+                    is_active=True
+                ),
+                Space(
+                    nama_space="Executive",
+                    tipe="Executive",
+                    kapasitas=9,
+                    harga_per_jam=150000,
+                    fasilitas="Ukuran 10x10m, AC, Ruangan Kedap, Smart Board Interactive, Speaker, Kursi Premium, View Danau, WiFi 100Mb/s",
                     is_active=True
                 ),
             ])
@@ -65,7 +65,6 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Co-Working Space Reservation", lifespan=lifespan)
-
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.include_router(auth_router.router)

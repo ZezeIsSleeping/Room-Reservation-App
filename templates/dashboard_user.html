@@ -1,521 +1,769 @@
 {% extends "base.html" %}
 
-{% block body_class %}bg-slate-950 text-white min-h-screen overflow-x-hidden{% endblock %}
+{% block body_class %}bg-slate-950 text-white min-h-screen{% endblock %}
 
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<!-- Ambient Glow Background agar efek kaca terlihat hidup -->
+<!-- Background Ambient Glow untuk efek Glassmorphism -->
 <div class="fixed inset-0 -z-20 bg-[#090b10]">
-    <div class="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-600/20 blur-[120px]"></div>
-    <div class="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] rounded-full bg-cyan-500/15 blur-[120px]"></div>
-    <div class="absolute top-[40%] left-[45%] w-[350px] h-[350px] rounded-full bg-rose-500/10 blur-[120px]"></div>
+    <div class="absolute top-[-10%] left-[-5%] w-[480px] h-[480px] rounded-full bg-indigo-600/20 blur-[120px]"></div>
+    <div class="absolute bottom-[-10%] right-[5%] w-[480px] h-[480px] rounded-full bg-cyan-500/15 blur-[120px]"></div>
 </div>
 
-<div class="min-h-screen flex flex-col lg:flex-row p-3 md:p-5 gap-4 max-w-[1600px] mx-auto">
+<div class="min-h-screen flex flex-col lg:flex-row p-3 md:p-5 gap-5 max-w-[1440px] mx-auto">
 
-    <!-- 1. SIDEBAR KIRI (Icon Rail + Navigasi Kategori) -->
-    <aside class="w-full lg:w-72 flex-shrink-0 bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl p-4 flex flex-col justify-between shadow-2xl">
+    <!-- SIDEBAR NAVIGASI (TAB INTERAKTIF) -->
+    <aside class="w-full lg:w-64 flex-shrink-0 bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl p-5 flex flex-col justify-between shadow-2xl">
         <div>
-            <!-- Brand Header -->
-            <div class="flex items-center justify-between px-2 pb-4 border-b border-white/10">
-                <div class="flex items-center gap-3">
-                    <img src="/assets/Logo.png" alt="Logo" class="h-8 w-auto object-contain">
-                    <div>
-                        <p class="font-bold text-sm tracking-wide text-white">CoWorkSpace</p>
-                        <p class="text-[11px] text-white/50">Member Portal</p>
-                    </div>
-                </div>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Online"></span>
+            <!-- Logo di Tengah -->
+            <div class="flex justify-center items-center pb-5 border-b border-white/10">
+                <img src="/assets/Logo.png" alt="CoWorkSpace Logo" class="h-12 w-auto object-contain">
             </div>
 
-            <!-- Menu Utama -->
-            <div class="mt-4 space-y-1">
-                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-2">Menu Utama</p>
-                <a href="#denah-section" class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/15 border border-white/15 text-sm font-medium text-white shadow-sm">
-                    <span class="flex items-center gap-2.5">
-                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                        Denah & Booking
-                    </span>
-                    <span class="text-xs bg-white/15 px-2 py-0.5 rounded-md">{{ spaces|length }}</span>
-                </a>
-                <a href="#riwayat-section" class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/10 text-sm text-white/75 hover:text-white transition">
-                    <span class="flex items-center gap-2.5">
-                        <span class="w-2 h-2 rounded-full bg-white/30"></span>
-                        Riwayat Reservasi
-                    </span>
+            <!-- Menu Tab Navigasi -->
+            <nav class="mt-5 space-y-1.5 text-sm" role="tablist">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-2">Navigasi</p>
+                
+                <button type="button" onclick="switchTab('katalog')" data-tab="katalog"
+                    class="nav-tab w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/15 border border-white/15 text-white font-medium transition cursor-pointer text-left">
+                    <span>Katalog Ruangan</span>
+                    <span class="text-xs bg-white/15 px-2 py-0.5 rounded-md">20 Unit</span>
+                </button>
+
+                <button type="button" onclick="switchTab('booking')" data-tab="booking"
+                    class="nav-tab w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-transparent text-white/75 hover:text-white hover:bg-white/10 transition cursor-pointer text-left">
+                    <span>Form Reservasi</span>
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                </button>
+
+                <button type="button" onclick="switchTab('riwayat')" data-tab="riwayat"
+                    class="nav-tab w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-transparent text-white/75 hover:text-white hover:bg-white/10 transition cursor-pointer text-left">
+                    <span>Riwayat Saya</span>
                     <span class="text-xs bg-white/10 px-2 py-0.5 rounded-md">{{ reservations|length }}</span>
-                </a>
-            </div>
-
-            <!-- Tree Kategori Ruangan (Inspirasi Sidebar Gambar 1) -->
-            <div class="mt-6">
-                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-white/40 mb-2">Tipe Ruangan (20 Unit)</p>
-                <div class="space-y-1.5 text-sm">
-                    <button type="button" onclick="filterTipe('ALL')" class="filter-btn w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/10 text-white text-left transition">
-                        <span>Semua Ruangan</span>
-                        <span class="text-xs text-white/60">20</span>
-                    </button>
-                    <div class="pl-3 border-l border-white/15 ml-3 space-y-1">
-                        <button type="button" onclick="filterTipe('Essential')" class="filter-btn w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/10 text-white/75 hover:text-white text-left transition">
-                            <div>
-                                <p class="font-medium text-xs">Essential (3,5x3,5m)</p>
-                                <p class="text-[10px] text-white/45">Max 4 org • 50k/jam</p>
-                            </div>
-                            <span class="text-xs bg-white/10 px-2 py-0.5 rounded-md">10</span>
-                        </button>
-                        <button type="button" onclick="filterTipe('Premium')" class="filter-btn w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/10 text-white/75 hover:text-white text-left transition">
-                            <div>
-                                <p class="font-medium text-xs">Premium (6x6m)</p>
-                                <p class="text-[10px] text-white/45">Max 9 org • 100k/jam</p>
-                            </div>
-                            <span class="text-xs bg-white/10 px-2 py-0.5 rounded-md">7</span>
-                        </button>
-                        <button type="button" onclick="filterTipe('Executive')" class="filter-btn w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/10 text-white/75 hover:text-white text-left transition">
-                            <div>
-                                <p class="font-medium text-xs">Executive (10x10m)</p>
-                                <p class="text-[10px] text-white/45">Max 9 org • 150k/jam</p>
-                            </div>
-                            <span class="text-xs bg-white/10 px-2 py-0.5 rounded-md">3</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                </button>
+            </nav>
         </div>
 
-        <!-- User Profile & Logout di Bawah Sidebar -->
-        <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between px-2">
-            <div class="truncate pr-2">
-                <p class="text-xs font-semibold text-white truncate">{{ user.name or user.email if user else 'Guest User' }}</p>
+        <!-- Profil User & Logout -->
+        <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between gap-2">
+            <div class="truncate">
+                <p class="text-xs font-semibold text-white truncate">{{ user.nama or user.email if user else 'Member' }}</p>
                 <p class="text-[11px] text-white/50 truncate">{{ user.email if user else '' }}</p>
             </div>
-            <a href="/logout" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/30 text-rose-200 text-xs font-medium transition">
+            <a href="/logout" class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/30 text-rose-200 text-xs font-medium transition flex-shrink-0">
                 Logout
             </a>
         </div>
     </aside>
 
-    <!-- 2. KONTEN UTAMA (DENAH RUANGAN ALA BIOSKOP + RIWAYAT) -->
-    <div class="flex-1 flex flex-col gap-4 min-w-0">
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 min-w-0 space-y-6">
 
-        <!-- Notifikasi Alert -->
+        <!-- Notifikasi Alert jika ada -->
         {% set alert_msg = msg or (request.query_params.get('msg') if request else None) %}
-        {% set alert_err = error or (request.query_params.get('error') if request else None) %}
+        {% set alert_err = error or (request.query_params.get('error') or request.query_params.get('err') if request else None) %}
         {% if alert_msg %}
-        <div class="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-100 text-xs backdrop-blur-md">
+        <div class="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-100 text-xs backdrop-blur-md">
             {{ alert_msg }}
         </div>
         {% endif %}
         {% if alert_err %}
-        <div class="p-3.5 rounded-2xl bg-rose-500/20 border border-rose-400/30 text-rose-100 text-xs backdrop-blur-md">
+        <div class="p-4 rounded-2xl bg-rose-500/20 border border-rose-400/30 text-rose-100 text-xs backdrop-blur-md">
             {{ alert_err }}
         </div>
         {% endif %}
 
-        <!-- Panel Denah Interaktif (Inspirasi Tengah Gambar 2) -->
-        <section id="denah-section" class="bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl p-5 md:p-6 shadow-2xl">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-white/10">
+        <!-- Header -->
+        <div class="bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl px-6 py-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h1 id="page-title" class="text-xl md:text-2xl font-bold text-white">Pilih & Pesan Co-Working Space</h1>
+                <p id="page-subtitle" class="text-xs text-white/60 mt-1">Lihat galeri ruangan, sisa unit tersedia, dan tentukan jadwal reservasi Anda</p>
+            </div>
+            <button type="button" onclick="switchTab('booking')" id="header-cta"
+                class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-semibold text-white transition cursor-pointer self-start sm:self-auto">
+                + Buat Reservasi
+            </button>
+        </div>
+
+        <!-- TAB 1: KATALOG RUANGAN -->
+        <section id="tab-katalog" class="tab-panel grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for sp in spaces %}
+            {% set harga = sp.harga_per_jam or 0 %}
+            {% set is_exec = ('executive' in (sp.tipe or '')|lower) or ('executive' in (sp.nama_space or '')|lower) or (harga >= 150000) %}
+            {% set is_mid = (not is_exec) and (('premium' in (sp.tipe or '')|lower) or ('premium' in (sp.nama_space or '')|lower) or (harga >= 100000)) %}
+            {% set max_stok = 3 if is_exec else (7 if is_mid else 10) %}
+            {% set sisa_stok = stock_map.get(sp.id, max_stok) if stock_map is defined else max_stok %}
+            {% set img_prefix = 'excutive' if is_exec else ('premium' if is_mid else 'essential') %}
+
+            <div class="room-card bg-white/[0.06] hover:bg-white/[0.09] backdrop-blur-md border border-white/15 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl transition duration-300 group"
+                 data-space-id="{{ sp.id }}" data-max-stok="{{ max_stok }}">
+                
                 <div>
-                    <h1 class="text-xl font-bold text-white">Pilih Ruangan Co-Working</h1>
-                    <p class="text-xs text-white/60 mt-0.5">Tentukan tanggal & jam untuk melihat ketersediaan ruangan secara real-time</p>
-                </div>
-
-                <!-- Filter Tanggal & Jam untuk Cek Occupied -->
-                <div class="flex flex-wrap items-center gap-2.5 bg-black/30 p-2 rounded-2xl border border-white/10">
-                    <div>
-                        <label class="block text-[10px] text-white/50 px-1">Tanggal</label>
-                        <input type="date" id="filter_tanggal" value="{{ today or '' }}"
-                            class="bg-white/10 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-white/50 px-1">Mulai</label>
-                        <input type="time" id="filter_mulai" value="09:00"
-                            class="bg-white/10 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-white/50 px-1">Selesai</label>
-                        <input type="time" id="filter_selesai" value="11:00"
-                            class="bg-white/10 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Indikator Area Lake View (Seperti Layar Bioskop di Gambar 2) -->
-            <div class="my-6">
-                <div class="w-3/4 mx-auto h-2 rounded-full bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.5)]"></div>
-                <p class="text-center text-[11px] uppercase tracking-[0.25em] text-cyan-300/70 mt-2">Panorama Lake View (Sisi Danau)</p>
-            </div>
-
-            <!-- DENAH 3 ZONA RUANGAN -->
-            <div class="space-y-6">
-
-                <!-- ZONA 1: EXECUTIVE (3 Ruangan - 10x10m) -->
-                <div class="zone-group" data-zone="Executive">
-                    <div class="flex items-center justify-between mb-2.5">
-                        <span class="text-xs font-semibold text-amber-300/90">Zona Executive • 10x10m (Max 9 Orang)</span>
-                        <span class="text-[11px] text-white/50">Rp 150.000 / jam</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {% for sp in spaces if sp.tipe == 'Executive' %}
-                        <button type="button"
-                            onclick="selectRoom(this)"
-                            data-id="{{ sp.id }}"
-                            data-nama="{{ sp.nama_space }}"
-                            data-tipe="{{ sp.tipe }}"
-                            data-kapasitas="{{ sp.kapasitas }}"
-                            data-fasilitas="{{ sp.fasilitas }}"
-                            data-harga="{{ sp.harga_per_jam }}"
-                            class="room-box group relative p-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-left transition-all duration-200 cursor-pointer">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-sm text-white">{{ sp.nama_space }}</span>
-                                <span class="status-badge text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Tersedia</span>
+                    <!-- IMAGE CAROUSEL -->
+                    <div class="carousel-container relative h-48 w-full overflow-hidden bg-slate-900/80 border-b border-white/10" data-index="0">
+                        
+                        <div class="carousel-track flex h-full w-full transition-transform duration-300 ease-out">
+                            {% for slide_num in [1, 2, 3] %}
+                            <div class="carousel-slide relative w-full h-full flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-indigo-900/50 via-slate-900 to-cyan-900/40">
+                                <span class="text-[11px] text-white/40 px-4 text-center">Foto {{ slide_num }} • /assets/{{ img_prefix }} {{ slide_num }}.jpg</span>
+                                <img src="/assets/{{ img_prefix }} {{ slide_num }}.jpg"
+                                    data-prefix="{{ img_prefix }}"
+                                    data-num="{{ slide_num }}"
+                                    data-step="0"
+                                    alt="{{ sp.nama_space }} - {{ slide_num }}"
+                                    onerror="tryNextImg(this)"
+                                    class="absolute inset-0 w-full h-full object-cover">
                             </div>
-                            <p class="text-[11px] text-white/60 mt-1.5">10x10m • Smart Board • Lake View</p>
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
+                            {% endfor %}
+                        </div>
 
-                <!-- ZONA 2: PREMIUM (7 Ruangan - 6x6m) -->
-                <div class="zone-group" data-zone="Premium">
-                    <div class="flex items-center justify-between mb-2.5">
-                        <span class="text-xs font-semibold text-cyan-300/90">Zona Premium • 6x6m (Max 9 Orang)</span>
-                        <span class="text-[11px] text-white/50">Rp 100.000 / jam</span>
+                        <!-- Gradient Overlay -->
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40"></div>
+
+                        <!-- Badge Tipe & Kapasitas -->
+                        <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                            <span class="text-[11px] backdrop-blur-md px-2.5 py-1 rounded-full font-semibold border
+                                {% if is_exec %}bg-amber-500/25 text-amber-200 border-amber-400/40
+                                {% elif is_mid %}bg-cyan-500/25 text-cyan-200 border-cyan-400/40
+                                {% else %}bg-indigo-500/30 text-indigo-200 border-indigo-400/40{% endif %}">
+                                {{ sp.tipe }}
+                            </span>
+                            <span class="text-[11px] bg-black/55 backdrop-blur-md text-white/90 px-2.5 py-1 rounded-full border border-white/15">
+                                Max {{ sp.kapasitas }} Org
+                            </span>
+                        </div>
+
+                        <!-- Tombol Navigasi Carousel -->
+                        <button type="button" onclick="moveSlide(this, -1)" aria-label="Foto sebelumnya"
+                            class="absolute left-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-80 group-hover:opacity-100 transition cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <button type="button" onclick="moveSlide(this, 1)" aria-label="Foto berikutnya"
+                            class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-80 group-hover:opacity-100 transition cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+
+                        <!-- Dots -->
+                        <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                            <button type="button" onclick="goToSlide(this, 0)" class="carousel-dot h-1.5 w-4 rounded-full bg-white transition-all cursor-pointer"></button>
+                            <button type="button" onclick="goToSlide(this, 1)" class="carousel-dot h-1.5 w-1.5 rounded-full bg-white/40 transition-all cursor-pointer"></button>
+                            <button type="button" onclick="goToSlide(this, 2)" class="carousel-dot h-1.5 w-1.5 rounded-full bg-white/40 transition-all cursor-pointer"></button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {% for sp in spaces if sp.tipe == 'Premium' %}
-                        <button type="button"
-                            onclick="selectRoom(this)"
-                            data-id="{{ sp.id }}"
-                            data-nama="{{ sp.nama_space }}"
-                            data-tipe="{{ sp.tipe }}"
-                            data-kapasitas="{{ sp.kapasitas }}"
-                            data-fasilitas="{{ sp.fasilitas }}"
-                            data-harga="{{ sp.harga_per_jam }}"
-                            class="room-box group relative p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-left transition-all duration-200 cursor-pointer">
-                            <div class="flex items-center justify-between gap-1">
-                                <span class="font-bold text-xs text-white">{{ sp.nama_space }}</span>
-                                <span class="status-badge w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+
+                    <!-- DETAIL SPESIFIKASI & STOK -->
+                    <div class="p-5">
+                        <div class="flex items-start justify-between gap-2">
+                            <h2 class="text-lg font-bold text-white">{{ sp.nama_space }}</h2>
+                            
+                            <span class="stock-badge inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border flex-shrink-0
+                                {% if sisa_stok <= 0 %}bg-rose-500/20 text-rose-200 border-rose-400/35
+                                {% elif sisa_stok <= 2 %}bg-amber-500/20 text-amber-200 border-amber-400/35
+                                {% else %}bg-emerald-500/20 text-emerald-200 border-emerald-400/35{% endif %}">
+                                <span class="stock-dot w-1.5 h-1.5 rounded-full {% if sisa_stok <= 0 %}bg-rose-400{% elif sisa_stok <= 2 %}bg-amber-400{% else %}bg-emerald-400 animate-pulse{% endif %}"></span>
+                                <span class="stock-text">Tersisa {{ sisa_stok }}/{{ max_stok }}</span>
+                            </span>
+                        </div>
+
+                        <!-- Highlight Ukuran & WiFi -->
+                        <div class="grid grid-cols-2 gap-2 mt-3.5">
+                            <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                <p class="text-[10px] uppercase tracking-wider text-white/45">Ukuran</p>
+                                <p class="text-xs font-semibold text-white mt-0.5">
+                                    {% if is_exec %}10 x 10 m
+                                    {% elif is_mid %}6 x 6 m
+                                    {% else %}3,5 x 3,5 m{% endif %}
+                                </p>
                             </div>
-                            <p class="text-[11px] text-white/60 mt-1">6x6m • Lake View</p>
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- ZONA 3: ESSENTIAL (10 Ruangan - 3,5x3,5m) -->
-                <div class="zone-group" data-zone="Essential">
-                    <div class="flex items-center justify-between mb-2.5">
-                        <span class="text-xs font-semibold text-indigo-300/90">Zona Essential • 3,5x3,5m (Max 4 Orang)</span>
-                        <span class="text-[11px] text-white/50">Rp 50.000 / jam</span>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                        {% for sp in spaces if sp.tipe == 'Essential' %}
-                        <button type="button"
-                            onclick="selectRoom(this)"
-                            data-id="{{ sp.id }}"
-                            data-nama="{{ sp.nama_space }}"
-                            data-tipe="{{ sp.tipe }}"
-                            data-kapasitas="{{ sp.kapasitas }}"
-                            data-fasilitas="{{ sp.fasilitas }}"
-                            data-harga="{{ sp.harga_per_jam }}"
-                            class="room-box group relative p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-left transition-all duration-200 cursor-pointer">
-                            <div class="flex items-center justify-between gap-1">
-                                <span class="font-bold text-xs text-white">{{ sp.nama_space }}</span>
-                                <span class="status-badge w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                                <p class="text-[10px] uppercase tracking-wider text-white/45">Internet</p>
+                                <p class="text-xs font-semibold text-cyan-300 mt-0.5">
+                                    {% if is_exec %}WiFi 100 Mb/s
+                                    {% elif is_mid %}WiFi 80 Mb/s
+                                    {% else %}WiFi 50 Mb/s{% endif %}
+                                </p>
                             </div>
-                            <p class="text-[10px] text-white/55 mt-1">3,5x3,5m • Kedap</p>
-                        </button>
-                        {% endfor %}
+                        </div>
+
+                        <!-- Fasilitas -->
+                        <div class="mt-3.5">
+                            <p class="text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-2">Fasilitas Ruangan</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                {% if is_exec %}
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">AC</span>
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">Ruangan Kedap</span>
+                                    <span class="text-[11px] bg-amber-500/15 border border-amber-400/25 px-2.5 py-1 rounded-lg text-amber-200">Smart Board Interactive</span>
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">Speaker</span>
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">Kursi Premium</span>
+                                    <span class="text-[11px] bg-cyan-500/15 border border-cyan-400/25 px-2.5 py-1 rounded-lg text-cyan-200">View Danau</span>
+                                {% elif is_mid %}
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">AC</span>
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">Ruangan Kedap</span>
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">Papan Tulis Kaca</span>
+                                    <span class="text-[11px] bg-cyan-500/15 border border-cyan-400/25 px-2.5 py-1 rounded-lg text-cyan-200">View Danau</span>
+                                {% else %}
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">AC</span>
+                                    <span class="text-[11px] bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg text-white/90">Ruangan Kedap</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Legenda Status Ruangan (Inspirasi Seats Info Gambar 2) -->
-            <div class="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 text-xs text-white/75">
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-white/15 border border-white/25 inline-block"></span>
-                    <span>Tersedia (Available)</span>
+                <!-- Harga & Tombol Pilih -->
+                <div class="px-5 py-4 border-t border-white/10 bg-black/20 flex items-center justify-between gap-2">
+                    <div>
+                        <p class="text-[10px] text-white/50">Tarif Sewa</p>
+                        <p class="text-lg font-bold text-white">
+                            Rp {{ "{:,.0f}".format(sp.harga_per_jam) }}
+                            <span class="text-xs font-normal text-white/50">/ jam</span>
+                        </p>
+                    </div>
+                    <button type="button" onclick="pilihKeForm('{{ sp.id }}')"
+                        {% if sisa_stok <= 0 %}disabled{% endif %}
+                        class="select-room-btn px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30 disabled:cursor-not-allowed border border-white/20 text-xs font-semibold text-white transition cursor-pointer">
+                        {% if sisa_stok <= 0 %}Penuh{% else %}Pilih Ruangan{% endif %}
+                    </button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-indigo-500 border border-indigo-300 shadow-[0_0_10px_rgba(99,102,241,0.7)] inline-block"></span>
-                    <span>Dipilih (Selected)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-md bg-rose-600/70 border border-rose-500 inline-block"></span>
-                    <span>Terisi / Sudah Dibayar (Occupied)</span>
-                </div>
+
             </div>
+            {% endfor %}
         </section>
 
-        <!-- Riwayat Reservasi User (Inspirasi List Bawah Gambar 1) -->
-        <section id="riwayat-section" class="bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl overflow-hidden shadow-2xl">
+        <!-- TAB 2: FORM RESERVASI RUANGAN -->
+        <section id="tab-booking" class="tab-panel hidden bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl p-6 md:p-8 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-5 border-b border-white/10 mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Form Reservasi Ruangan</h2>
+                    <p id="stock-schedule-hint" class="text-xs text-white/55 mt-0.5">Pilih ruangan, tanggal, dan jam untuk melihat sisa unit & total biaya</p>
+                </div>
+                <button type="button" onclick="switchTab('katalog')" class="text-xs text-cyan-300 hover:text-cyan-200 underline cursor-pointer self-start sm:self-auto">
+                    &larr; Kembali ke Katalog
+                </button>
+            </div>
+
+            <!-- Alert Validasi Form Lokal -->
+            <div id="form-local-error" class="hidden mb-5 p-3.5 rounded-2xl bg-rose-500/20 border border-rose-400/35 text-rose-100 text-xs"></div>
+
+            <form id="booking-form" method="post" action="/reservations/create" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-medium text-white/80 mb-2">Pilih Ruangan</label>
+                        <select id="select_space_id" name="space_id" required
+                            class="w-full bg-white/10 border border-white/20 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
+                            {% for sp in spaces %}
+                            {% set harga = sp.harga_per_jam or 0 %}
+                            {% set is_exec = ('executive' in (sp.tipe or '')|lower) or ('executive' in (sp.nama_space or '')|lower) or (harga >= 150000) %}
+                            {% set is_mid = (not is_exec) and (('premium' in (sp.tipe or '')|lower) or ('premium' in (sp.nama_space or '')|lower) or (harga >= 100000)) %}
+                            {% set max_stok = 3 if is_exec else (7 if is_mid else 10) %}
+                            {% set sisa_stok = stock_map.get(sp.id, max_stok) if stock_map is defined else max_stok %}
+                            <option value="{{ sp.id }}"
+                                data-nama="{{ sp.nama_space }}"
+                                data-harga-raw="{{ sp.harga_per_jam }}"
+                                data-harga="{{ '{:,.0f}'.format(sp.harga_per_jam) }}"
+                                data-fasilitas="{{ sp.fasilitas }}"
+                                class="bg-slate-900 text-white">
+                                {{ sp.nama_space }} - Sisa {{ sisa_stok }} (Rp {{ "{:,.0f}".format(sp.harga_per_jam) }}/jam)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-white/80 mb-2">Tanggal Reservasi</label>
+                        <input type="date" id="booking_tanggal" name="tanggal" required
+                            onclick="try{this.showPicker()}catch(e){}"
+                            class="w-full bg-white/10 border border-white/20 rounded-xl px-3.5 py-2.5 text-sm text-white [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-white/80 mb-2">Jam Mulai</label>
+                        <input type="time" id="booking_mulai" name="jam_mulai" required
+                            onclick="try{this.showPicker()}catch(e){}"
+                            class="w-full bg-white/10 border border-white/20 rounded-xl px-3.5 py-2.5 text-sm text-white [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-white/80 mb-2">Jam Selesai</label>
+                        <input type="time" id="booking_selesai" name="jam_selesai" required
+                            onclick="try{this.showPicker()}catch(e){}"
+                            class="w-full bg-white/10 border border-white/20 rounded-xl px-3.5 py-2.5 text-sm text-white [color-scheme:dark] focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Ringkasan Estimasi Biaya -->
+                <div class="bg-black/30 border border-white/15 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="text-xs text-white/50">Ringkasan Pesanan</p>
+                        <p id="summary-room-name" class="text-sm font-bold text-white">-</p>
+                        <p id="summary-duration" class="text-xs text-white/60">Pilih jam mulai & selesai untuk menghitung durasi</p>
+                    </div>
+                    <div class="sm:text-right">
+                        <p class="text-xs text-white/50">Estimasi Total Bayar</p>
+                        <p id="summary-total-price" class="text-xl font-bold text-cyan-300">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="w-full sm:w-auto bg-black/85 hover:bg-black border border-white/25 text-white font-semibold py-3 px-8 rounded-xl text-sm shadow-lg transition cursor-pointer">
+                        Lanjut ke Pembayaran QR &rarr;
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- TAB 3: RIWAYAT RESERVASI USER -->
+        <section id="tab-riwayat" class="tab-panel hidden bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl shadow-xl overflow-hidden">
             <div class="p-5 border-b border-white/10 flex items-center justify-between">
-                <h2 class="font-bold text-base text-white">Riwayat Reservasi Saya</h2>
-                <span class="text-xs text-white/50">Selesaikan pembayaran agar ruangan terkunci</span>
+                <h2 class="font-bold text-lg text-white">Riwayat Reservasi Saya</h2>
+                <button type="button" onclick="switchTab('booking')" class="text-xs bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 rounded-xl text-white transition cursor-pointer">
+                    + Booking Baru
+                </button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
-                    <thead class="bg-white/5 text-white/50 uppercase text-[11px]">
+                    <thead class="bg-white/5 text-white/60 uppercase text-xs">
                         <tr>
-                            <th class="px-5 py-3">Ruangan</th>
-                            <th class="px-5 py-3">Tanggal</th>
-                            <th class="px-5 py-3">Jam</th>
-                            <th class="px-5 py-3">Total Bayar</th>
-                            <th class="px-5 py-3">Status</th>
-                            <th class="px-5 py-3 text-right">Aksi</th>
+                            <th class="px-5 py-3.5">Space</th>
+                            <th class="px-5 py-3.5">Tanggal</th>
+                            <th class="px-5 py-3.5">Jam</th>
+                            <th class="px-5 py-3.5">Total Bayar</th>
+                            <th class="px-5 py-3.5">Status</th>
+                            <th class="px-5 py-3.5">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/10 text-xs">
+                    <tbody class="divide-y divide-white/10">
                         {% for r in reservations %}
                         <tr class="hover:bg-white/[0.03] transition">
-                            <td class="px-5 py-3.5 font-semibold text-white">{{ r.space.nama_space }}</td>
+                            <td class="px-5 py-3.5 font-medium text-white">{{ r.space.nama_space }}</td>
                             <td class="px-5 py-3.5 text-white/80">{{ r.tanggal }}</td>
                             <td class="px-5 py-3.5 text-white/80">{{ r.jam_mulai.strftime('%H:%M') }} - {{ r.jam_selesai.strftime('%H:%M') }}</td>
                             <td class="px-5 py-3.5 font-semibold text-white">Rp {{ "{:,.0f}".format(r.total_bayar) }}</td>
                             <td class="px-5 py-3.5">
-                                <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold
-                                    {% if r.status == 'confirmed' %}bg-rose-500/25 text-rose-200 border border-rose-500/40
-                                    {% elif r.status == 'cancelled' %}bg-white/10 text-white/50
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold
+                                    {% if r.status == 'confirmed' %}bg-emerald-500/20 text-emerald-300 border border-emerald-400/30
+                                    {% elif r.status == 'cancelled' %}bg-rose-500/20 text-rose-300 border border-rose-400/30
                                     {% else %}bg-amber-500/20 text-amber-200 border border-amber-400/30{% endif %}">
-                                    {% if r.status == 'confirmed' %}Paid / Occupied{% else %}{{ r.status }}{% endif %}
+                                    {{ r.status }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5 text-right">
+                            <td class="px-5 py-3.5">
                                 {% if r.status == 'pending' %}
-                                <div class="inline-flex items-center gap-2">
-                                    <!-- Tombol Bayar untuk mengunci ruangan jadi Merah -->
-                                    <form method="post" action="/reservations/{{ r.id }}/pay">
-                                        <button type="submit" class="bg-emerald-500/80 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer">
-                                            Bayar Sekarang
-                                        </button>
-                                    </form>
-                                    <form method="post" action="/reservations/{{ r.id }}/status">
-                                        <input type="hidden" name="status" value="cancelled">
-                                        <button type="submit" class="bg-white/10 hover:bg-rose-500/30 text-white/80 hover:text-rose-200 px-3 py-1.5 rounded-xl transition cursor-pointer">
-                                            Batal
-                                        </button>
-                                    </form>
-                                </div>
+                                <form method="post" action="/reservations/{{ r.id }}/status">
+                                    <input type="hidden" name="status" value="cancelled">
+                                    <button class="bg-rose-600/80 hover:bg-rose-600 border border-rose-400/30 text-white px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
+                                        Batalkan
+                                    </button>
+                                </form>
                                 {% else %}
-                                <span class="text-white/40">-</span>
+                                <span class="text-white/40 text-xs">-</span>
                                 {% endif %}
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6" class="px-5 py-8 text-center text-white/40">Belum ada riwayat reservasi. Pilih ruangan pada denah di atas.</td>
+                            <td colspan="6" class="px-5 py-8 text-center text-white/40">Anda belum memiliki reservasi.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </section>
+
     </div>
+</div>
 
-    <!-- 3. PANEL KANAN: DETAIL RUANGAN & CHECKOUT (Inspirasi Panel Kanan Gambar 2) -->
-    <aside class="w-full lg:w-80 flex-shrink-0 bg-white/[0.06] backdrop-blur-md border border-white/15 rounded-3xl p-5 flex flex-col justify-between shadow-2xl">
-        <div>
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
-                <span class="text-xs font-semibold uppercase tracking-wider text-white/50">Detail Ruangan</span>
-                <span id="detail-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/25 text-indigo-200 border border-indigo-400/30">Pilih Ruangan</span>
+<!-- POP-UP MODAL QR PAYMENT -->
+<div id="qr-payment-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="relative w-full max-w-md bg-[#111522]/95 border border-white/20 rounded-3xl p-6 shadow-2xl space-y-5 animate-fadeIn">
+        
+        <!-- Header Modal -->
+        <div class="flex items-start justify-between gap-3 border-b border-white/10 pb-4">
+            <div>
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-cyan-300 bg-cyan-500/15 border border-cyan-400/30 px-2.5 py-0.5 rounded-full">
+                    QRIS / QR Payment
+                </span>
+                <h3 class="text-lg font-bold text-white mt-1.5">Selesaikan Pembayaran</h3>
+                <p class="text-xs text-white/55">Scan kode QR di bawah sesuai nominal tertera</p>
             </div>
+            <button type="button" onclick="closeQrModal()" aria-label="Tutup"
+                class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white flex items-center justify-center transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
 
-            <!-- Visual Banner Ruangan -->
-            <div class="mt-4 h-36 rounded-2xl bg-gradient-to-br from-indigo-500/25 via-slate-900 to-cyan-500/20 border border-white/15 p-4 flex flex-col justify-between relative overflow-hidden">
-                <div class="flex justify-between items-start">
-                    <span id="detail-kapasitas" class="text-[11px] bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-white/90">
-                        Max - Orang
-                    </span>
-                    <span id="detail-harga" class="text-xs font-bold text-cyan-300">Rp 0 / jam</span>
+        <!-- Kotak Gambar QR Code -->
+        <div class="flex flex-col items-center justify-center bg-white rounded-2xl p-4 shadow-inner">
+            <div class="relative w-52 h-52 flex items-center justify-center overflow-hidden rounded-xl bg-slate-100">
+                <!-- Fallback Placeholder jika file /assets/qr_payment.png belum ditaruh -->
+                <div id="qr-fallback-box" class="flex flex-col items-center justify-center text-center p-3 text-slate-500">
+                    <svg class="w-16 h-16 text-slate-800 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"/>
+                    </svg>
+                    <p class="text-[11px] font-semibold text-slate-700">Dummy QR Payment</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Simpan gambar di:<br><code class="font-mono text-slate-700">/assets/qr_payment.png</code></p>
                 </div>
-                <div>
-                    <h3 id="detail-nama" class="text-lg font-bold text-white">Belum Dipilih</h3>
-                    <p id="detail-sub" class="text-xs text-white/60">Klik salah satu kotak ruangan di denah</p>
-                </div>
+
+                <!-- Gambar QR Asli (Otomatis mencari .png / .jpg / .jpeg / qr.png) -->
+                <img src="/assets/qr_payment.png"
+                    data-fallbacks="/assets/qr_payment.jpg|/assets/qr_payment.jpeg|/assets/qr_payment.webp|/assets/qr.png|/assets/qr.jpg|/assets/QR.png"
+                    alt="QR Payment"
+                    onerror="tryNextQrImg(this)"
+                    class="absolute inset-0 w-full h-full object-contain bg-white">
             </div>
+            <p class="text-[11px] font-semibold text-slate-600 mt-2.5 tracking-wide">CoWorkSpace Official Payment</p>
+        </div>
 
-            <!-- Daftar Fasilitas -->
-            <div class="mt-4">
-                <p class="text-xs font-semibold text-white/80 mb-2">Fasilitas & Spesifikasi:</p>
-                <div id="detail-fasilitas" class="p-3.5 rounded-2xl bg-black/25 border border-white/10 text-xs text-white/75 leading-relaxed">
-                    Silakan pilih ruangan dari zona Essential, Premium, atau Executive pada denah di tengah untuk melihat detail ukuran, kecepatan WiFi, dan fasilitas ruangan.
-                </div>
+        <!-- Detail Ringkasan di Modal -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2 text-xs">
+            <div class="flex justify-between">
+                <span class="text-white/55">Ruangan</span>
+                <span id="modal-room-name" class="font-semibold text-white">-</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-white/55">Tanggal</span>
+                <span id="modal-date" class="font-medium text-white">-</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-white/55">Waktu & Durasi</span>
+                <span id="modal-time" class="font-medium text-white">-</span>
+            </div>
+            <div class="pt-2 border-t border-white/10 flex items-center justify-between">
+                <span class="text-white/75 font-medium">Total Pembayaran</span>
+                <span id="modal-total" class="text-base font-bold text-cyan-300">Rp 0</span>
             </div>
         </div>
 
-        <!-- Form Submit Checkout -->
-        <form method="post" action="/reservations/create" class="mt-6 pt-4 border-t border-white/10 space-y-3">
-            <input type="hidden" name="space_id" id="form_space_id" required>
-            <input type="hidden" name="tanggal" id="form_tanggal" required>
-            <input type="hidden" name="jam_mulai" id="form_jam_mulai" required>
-            <input type="hidden" name="jam_selesai" id="form_jam_selesai" required>
-
-            <div class="bg-black/30 rounded-2xl p-3.5 border border-white/10 space-y-1.5 text-xs">
-                <div class="flex justify-between text-white/60">
-                    <span>Jadwal</span>
-                    <span id="summary-waktu" class="text-white font-medium">-</span>
-                </div>
-                <div class="flex justify-between text-white/60">
-                    <span>Durasi</span>
-                    <span id="summary-durasi" class="text-white font-medium">0 Jam</span>
-                </div>
-                <div class="flex justify-between items-center pt-2 border-t border-white/10">
-                    <span class="text-white/80 font-semibold">Estimasi Total</span>
-                    <span id="summary-total" class="text-base font-bold text-white">Rp 0</span>
-                </div>
-            </div>
-
-            <button type="submit" id="btn-checkout" disabled
-                class="w-full py-3 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 disabled:bg-white/10 disabled:text-white/30 disabled:cursor-not-allowed text-white font-semibold text-sm shadow-lg transition cursor-pointer">
-                Booking Ruangan
+        <!-- Tombol Aksi Modal -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+            <button type="button" onclick="closeQrModal()"
+                class="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-semibold text-white/80 hover:text-white transition cursor-pointer">
+                Batal
             </button>
-        </form>
-    </aside>
-
+            <button type="button" onclick="confirmQrPayment()"
+                class="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 text-xs font-semibold text-white shadow-lg transition cursor-pointer">
+                Sudah Bayar & Booking
+            </button>
+        </div>
+    </div>
 </div>
 
+<!-- Script Tab Navigasi, Carousel, QR Modal, Anti-Tanggal Kemarin & Cek Stok Real-Time -->
 <script>
-    let selectedHarga = 0;
+    const tabMeta = {
+        katalog: {
+            title: 'Pilih & Pesan Co-Working Space',
+            subtitle: 'Lihat galeri ruangan, sisa unit tersedia, dan tentukan jadwal reservasi Anda',
+            showCta: true
+        },
+        booking: {
+            title: 'Form Reservasi Ruangan',
+            subtitle: 'Lengkapi detail ruangan, tanggal, dan jam pemakaian',
+            showCta: false
+        },
+        riwayat: {
+            title: 'Riwayat Reservasi Saya',
+            subtitle: 'Pantau status konfirmasi dan kelola jadwal reservasi Anda',
+            showCta: true
+        }
+    };
 
-    const inputTanggal = document.getElementById('filter_tanggal');
-    const inputMulai = document.getElementById('filter_mulai');
-    const inputSelesai = document.getElementById('filter_selesai');
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.classList.add('hidden');
+        });
 
-    // Set default tanggal hari ini jika kosong
-    if (!inputTanggal.value) {
-        inputTanggal.value = new Date().toISOString().split('T')[0];
+        const activePanel = document.getElementById(`tab-${tabName}`);
+        if (activePanel) {
+            activePanel.classList.remove('hidden');
+        }
+
+        document.querySelectorAll('.nav-tab').forEach(btn => {
+            if (btn.dataset.tab === tabName) {
+                btn.classList.remove('border-transparent', 'text-white/75');
+                btn.classList.add('bg-white/15', 'border-white/15', 'text-white', 'font-medium');
+            } else {
+                btn.classList.remove('bg-white/15', 'border-white/15', 'text-white', 'font-medium');
+                btn.classList.add('border-transparent', 'text-white/75');
+            }
+        });
+
+        if (tabMeta[tabName]) {
+            document.getElementById('page-title').textContent = tabMeta[tabName].title;
+            document.getElementById('page-subtitle').textContent = tabMeta[tabName].subtitle;
+            const cta = document.getElementById('header-cta');
+            if (cta) cta.classList.toggle('hidden', !tabMeta[tabName].showCta);
+        }
     }
 
-    // 1. Fungsi Filter Kategori di Sidebar
-    function filterTipe(tipe) {
-        document.querySelectorAll('.zone-group').forEach(zone => {
-            if (tipe === 'ALL' || zone.dataset.zone === tipe) {
-                zone.classList.remove('hidden');
+    function tryNextImg(img) {
+        const p = img.dataset.prefix;
+        const n = img.dataset.num;
+        const cap = p.charAt(0).toUpperCase() + p.slice(1);
+        const exts = ['jpg', 'png', 'jpeg', 'webp', 'JPG', 'PNG'];
+
+        const candidates = [];
+        const names = [`${p} ${n}`, `${p}${n}`, `${p}_${n}`, `${p}-${n}`, `${cap} ${n}`, `${cap}${n}`];
+        if (p === 'excutive') {
+            names.push(`executive ${n}`, `executive${n}`, `Executive ${n}`);
+        }
+
+        names.forEach(name => exts.forEach(ext => candidates.push(`/assets/${name}.${ext}`)));
+
+        const step = parseInt(img.dataset.step || '0', 10) + 1;
+        if (step < candidates.length) {
+            img.dataset.step = step;
+            img.src = candidates[step];
+        } else {
+            img.style.display = 'none';
+        }
+    }
+
+    function tryNextQrImg(img) {
+        const list = (img.dataset.fallbacks || '').split('|').filter(Boolean);
+        if (list.length > 0) {
+            img.src = list.shift();
+            img.dataset.fallbacks = list.join('|');
+        } else {
+            img.style.display = 'none';
+        }
+    }
+
+    function renderCarousel(container, targetIndex) {
+        const track = container.querySelector('.carousel-track');
+        const slides = container.querySelectorAll('.carousel-slide');
+        const dots = container.querySelectorAll('.carousel-dot');
+        const total = slides.length;
+        if (!total) return;
+
+        const index = (targetIndex + total) % total;
+        container.dataset.index = index;
+        track.style.transform = `translateX(-${index * 100}%)`;
+
+        dots.forEach((dot, i) => {
+            if (i === index) {
+                dot.classList.remove('bg-white/40', 'w-1.5');
+                dot.classList.add('bg-white', 'w-4');
             } else {
-                zone.classList.add('hidden');
+                dot.classList.remove('bg-white', 'w-4');
+                dot.classList.add('bg-white/40', 'w-1.5');
             }
         });
     }
 
-    // 2. Fungsi Memilih Kotak Ruangan pada Denah
-    function selectRoom(btn) {
-        if (btn.disabled) return;
-
-        // Reset style semua ruangan yang tidak occupied
-        document.querySelectorAll('.room-box:not([disabled])').forEach(el => {
-            el.classList.remove('bg-indigo-500/40', 'border-indigo-400', 'ring-2', 'ring-indigo-400');
-            el.classList.add('bg-white/10', 'border-white/20');
-        });
-
-        // Highlight ruangan terpilih (Selected)
-        btn.classList.remove('bg-white/10', 'border-white/20');
-        btn.classList.add('bg-indigo-500/40', 'border-indigo-400', 'ring-2', 'ring-indigo-400');
-
-        // Isi Panel Detail Kanan
-        const id = btn.dataset.id;
-        const nama = btn.dataset.nama;
-        const tipe = btn.dataset.tipe;
-        const kapasitas = btn.dataset.kapasitas;
-        const fasilitas = btn.dataset.fasilitas;
-        selectedHarga = parseFloat(btn.dataset.harga) || 0;
-
-        document.getElementById('detail-badge').textContent = tipe;
-        document.getElementById('detail-nama').textContent = nama;
-        document.getElementById('detail-sub').textContent = `Tipe ${tipe} • Siap Dipesan`;
-        document.getElementById('detail-kapasitas').textContent = `Max ${kapasitas} Orang`;
-        document.getElementById('detail-harga').textContent = `Rp ${selectedHarga.toLocaleString('id-ID')} / jam`;
-        document.getElementById('detail-fasilitas').textContent = fasilitas;
-
-        document.getElementById('form_space_id').value = id;
-        document.getElementById('btn-checkout').disabled = false;
-
-        updateCheckoutSummary();
+    function moveSlide(btn, step) {
+        const container = btn.closest('.carousel-container');
+        const current = parseInt(container.dataset.index || '0', 10);
+        renderCarousel(container, current + step);
     }
 
-    // 3. Kalkulasi Durasi & Total Biaya Otomatis
-    function updateCheckoutSummary() {
-        const tgl = inputTanggal.value;
-        const mulai = inputMulai.value;
-        const selesai = inputSelesai.value;
+    function goToSlide(dot, index) {
+        const container = dot.closest('.carousel-container');
+        renderCarousel(container, index);
+    }
 
-        document.getElementById('form_tanggal').value = tgl;
-        document.getElementById('form_jam_mulai').value = mulai;
-        document.getElementById('form_jam_selesai').value = selesai;
-        document.getElementById('summary-waktu').textContent = `${tgl} (${mulai}-${selesai})`;
+    function pilihKeForm(spaceId) {
+        const select = document.getElementById('select_space_id');
+        if (select) {
+            select.value = spaceId;
+            updateBookingSummary();
+        }
+        switchTab('booking');
+    }
 
-        if (mulai && selesai) {
-            const [h1, m1] = mulai.split(':').map(Number);
-            const [h2, m2] = selesai.split(':').map(Number);
-            const durasi = Math.max(0, (h2 + m2 / 60) - (h1 + m1 / 60));
+    // Referensi Elemen Form & Modal QR
+    const bookingForm = document.getElementById('booking-form');
+    const spaceSelect = document.getElementById('select_space_id');
+    const tglInput = document.getElementById('booking_tanggal');
+    const mulaiInput = document.getElementById('booking_mulai');
+    const selesaiInput = document.getElementById('booking_selesai');
+    const qrModal = document.getElementById('qr-payment-modal');
+    const localErrorBox = document.getElementById('form-local-error');
 
-            document.getElementById('summary-durasi').textContent = `${durasi} Jam`;
-            const total = durasi * selectedHarga;
-            document.getElementById('summary-total').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+    // Kunci kalender agar tidak bisa memilih tanggal sebelum hari ini (menggunakan waktu lokal)
+    function getTodayLocalStr() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    tglInput.setAttribute('min', getTodayLocalStr());
+
+    function getDurationHours() {
+        const mulai = mulaiInput.value;
+        const selesai = selesaiInput.value;
+        if (!mulai || !selesai) return 0;
+        const [h1, m1] = mulai.split(':').map(Number);
+        const [h2, m2] = selesai.split(':').map(Number);
+        return (h2 + m2 / 60) - (h1 + m1 / 60);
+    }
+
+    function updateBookingSummary() {
+        const opt = spaceSelect.options[spaceSelect.selectedIndex];
+        if (!opt) return;
+
+        const nama = opt.dataset.nama || '';
+        const hargaRaw = parseFloat(opt.dataset.hargaRaw || '0');
+        document.getElementById('summary-room-name').textContent = `${nama} (Rp ${hargaRaw.toLocaleString('id-ID')} / jam)`;
+
+        const durasi = getDurationHours();
+        if (mulaiInput.value && selesaiInput.value) {
+            if (durasi > 0) {
+                const total = Math.round(durasi * hargaRaw);
+                document.getElementById('summary-duration').textContent = `Durasi: ${durasi.toFixed(1).replace('.0', '')} Jam (${mulaiInput.value} - ${selesaiInput.value})`;
+                document.getElementById('summary-total-price').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+            } else {
+                document.getElementById('summary-duration').textContent = 'Jam selesai harus lebih besar dari jam mulai';
+                document.getElementById('summary-total-price').textContent = 'Rp 0';
+            }
         }
     }
 
-    // 4. Fetch Real-Time Ruangan yang Sudah Paid/Occupied (Merah)
-    async function checkOccupiedRooms() {
-        updateCheckoutSummary();
-        const tgl = inputTanggal.value;
-        const mulai = inputMulai.value;
-        const selesai = inputSelesai.value;
+    // Intercept submit form untuk memunculkan pop-up QR Payment
+    bookingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        localErrorBox.classList.add('hidden');
 
+        const opt = spaceSelect.options[spaceSelect.selectedIndex];
+        if (!opt || opt.disabled) {
+            localErrorBox.textContent = 'Maaf, stok ruangan yang dipilih sudah penuh pada jadwal tersebut.';
+            localErrorBox.classList.remove('hidden');
+            return;
+        }
+
+        // Validasi anti-tanggal kemarin & jam yang sudah lewat hari ini
+        const selectedDateStr = tglInput.value;
+        const currentTodayStr = getTodayLocalStr();
+        if (selectedDateStr < currentTodayStr) {
+            localErrorBox.textContent = 'Tanggal reservasi tidak boleh hari yang sudah lewat.';
+            localErrorBox.classList.remove('hidden');
+            return;
+        }
+
+        if (selectedDateStr === currentTodayStr && mulaiInput.value) {
+            const now = new Date();
+            const [hStart, mStart] = mulaiInput.value.split(':').map(Number);
+            const startDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hStart, mStart);
+            if (startDateTime < now) {
+                localErrorBox.textContent = 'Jam mulai sudah terlewat untuk hari ini. Silakan pilih jam berikutnya.';
+                localErrorBox.classList.remove('hidden');
+                return;
+            }
+        }
+
+        const durasi = getDurationHours();
+        if (durasi <= 0) {
+            localErrorBox.textContent = 'Jam selesai harus lebih besar dari jam mulai.';
+            localErrorBox.classList.remove('hidden');
+            return;
+        }
+
+        const hargaRaw = parseFloat(opt.dataset.hargaRaw || '0');
+        const total = Math.round(durasi * hargaRaw);
+
+        document.getElementById('modal-room-name').textContent = opt.dataset.nama || '-';
+        document.getElementById('modal-date').textContent = tglInput.value;
+        document.getElementById('modal-time').textContent = `${mulaiInput.value} - ${selesaiInput.value} (${durasi.toFixed(1).replace('.0', '')} Jam)`;
+        document.getElementById('modal-total').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+
+        qrModal.classList.remove('hidden');
+        qrModal.classList.add('flex');
+    });
+
+    function closeQrModal() {
+        qrModal.classList.add('hidden');
+        qrModal.classList.remove('flex');
+    }
+
+    function confirmQrPayment() {
+        bookingForm.submit();
+    }
+
+    qrModal.addEventListener('click', function(e) {
+        if (e.target === qrModal) closeQrModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !qrModal.classList.contains('hidden')) closeQrModal();
+    });
+
+    async function refreshStockBySchedule() {
+        updateBookingSummary();
+        const tgl = tglInput.value;
+        const mulai = mulaiInput.value;
+        const selesai = selesaiInput.value;
         if (!tgl || !mulai || !selesai) return;
 
         try {
-            const res = await fetch(`/api/spaces/occupied?tanggal=${tgl}&jam_mulai=${mulai}&jam_selesai=${selesai}`);
+            const res = await fetch(`/api/spaces/stock?tanggal=${tgl}&jam_mulai=${mulai}&jam_selesai=${selesai}`);
             if (!res.ok) return;
-            const data = await res.json();
-            const occupiedIds = data.occupied_space_ids.map(String);
+            const stockData = await res.json();
 
-            document.querySelectorAll('.room-box').forEach(btn => {
-                const roomId = btn.dataset.id;
-                const badge = btn.querySelector('.status-badge');
+            document.getElementById('stock-schedule-hint').textContent = `Menampilkan sisa stok untuk ${tgl} (${mulai} - ${selesai})`;
 
-                if (occupiedIds.includes(roomId)) {
-                    // Ubah jadi MERAH (Occupied) & kunci klik
+            document.querySelectorAll('.room-card').forEach(card => {
+                const spaceId = card.dataset.spaceId;
+                const maxStok = parseInt(card.dataset.maxStok || '10', 10);
+                if (stockData[spaceId] === undefined) return;
+
+                const sisa = Math.max(0, stockData[spaceId]);
+                const badge = card.querySelector('.stock-badge');
+                const dot = card.querySelector('.stock-dot');
+                const text = card.querySelector('.stock-text');
+                const btn = card.querySelector('.select-room-btn');
+
+                text.textContent = `Tersisa ${sisa}/${maxStok}`;
+
+                if (sisa <= 0) {
+                    badge.className = 'stock-badge inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border flex-shrink-0 bg-rose-500/20 text-rose-200 border-rose-400/35';
+                    dot.className = 'stock-dot w-1.5 h-1.5 rounded-full bg-rose-400';
                     btn.disabled = true;
-                    btn.className = "room-box relative p-3.5 rounded-2xl bg-rose-600/35 border border-rose-500/80 text-left opacity-90 cursor-not-allowed";
-                    if (badge && badge.textContent.trim() !== '') {
-                        badge.textContent = 'Occupied';
-                        badge.className = 'status-badge text-[10px] px-2 py-0.5 rounded-full bg-rose-500/40 text-rose-100 border border-rose-400/50';
-                    } else if (badge) {
-                        badge.className = 'status-badge w-2.5 h-2.5 rounded-full bg-rose-500';
-                    }
-
-                    // Jika ruangan yang sedang dipilih ternyata occupied, reset checkout
-                    if (document.getElementById('form_space_id').value === roomId) {
-                        document.getElementById('form_space_id').value = '';
-                        document.getElementById('btn-checkout').disabled = true;
-                        document.getElementById('detail-nama').textContent = 'Ruangan Terisi';
-                        document.getElementById('detail-sub').textContent = 'Pilih ruangan lain yang masih tersedia';
-                    }
+                    btn.textContent = 'Penuh';
+                } else if (sisa <= 2) {
+                    badge.className = 'stock-badge inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border flex-shrink-0 bg-amber-500/20 text-amber-200 border-amber-400/35';
+                    dot.className = 'stock-dot w-1.5 h-1.5 rounded-full bg-amber-400';
+                    btn.disabled = false;
+                    btn.textContent = 'Pilih Ruangan';
                 } else {
-                    // Kembalikan ke status Tersedia jika sebelumnya merah
-                    if (btn.disabled) {
-                        btn.disabled = false;
-                        btn.className = "room-box group relative p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-left transition-all duration-200 cursor-pointer";
-                        if (badge && badge.textContent.trim() !== '') {
-                            badge.textContent = 'Tersedia';
-                            badge.className = 'status-badge text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
-                        } else if (badge) {
-                            badge.className = 'status-badge w-2.5 h-2.5 rounded-full bg-emerald-400';
-                        }
-                    }
+                    badge.className = 'stock-badge inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border flex-shrink-0 bg-emerald-500/20 text-emerald-200 border-emerald-400/35';
+                    dot.className = 'stock-dot w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+                    btn.disabled = false;
+                    btn.textContent = 'Pilih Ruangan';
+                }
+
+                const opt = document.querySelector(`#select_space_id option[value="${spaceId}"]`);
+                if (opt) {
+                    opt.textContent = `${opt.dataset.nama} - Sisa ${sisa} (Rp ${opt.dataset.harga}/jam)`;
+                    opt.disabled = sisa <= 0;
                 }
             });
-        } catch (err) {
-            console.error("Gagal mengecek ketersediaan ruangan:", err);
+        } catch (e) {
+            console.error('Gagal memuat sisa stok:', e);
         }
     }
 
-    inputTanggal.addEventListener('change', checkOccupiedRooms);
-    inputMulai.addEventListener('change', checkOccupiedRooms);
-    inputSelesai.addEventListener('change', checkOccupiedRooms);
+    spaceSelect.addEventListener('change', updateBookingSummary);
+    tglInput.addEventListener('change', refreshStockBySchedule);
+    mulaiInput.addEventListener('change', refreshStockBySchedule);
+    selesaiInput.addEventListener('change', refreshStockBySchedule);
 
-    // Jalankan pengecekan saat halaman pertama kali dibuka
-    checkOccupiedRooms();
+    updateBookingSummary();
+    {% if alert_err %}
+        switchTab('booking');
+    {% elif alert_msg %}
+        switchTab('riwayat');
+    {% else %}
+        switchTab('katalog');
+    {% endif %}
 </script>
 {% endblock %}

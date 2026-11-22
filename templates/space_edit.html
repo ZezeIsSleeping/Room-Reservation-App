@@ -1,40 +1,176 @@
 {% extends "base.html" %}
+
+{% block body_class %}bg-black text-zinc-100 min-h-screen antialiased{% endblock %}
+
+{% block navbar %}{% endblock %}
+
 {% block content %}
-<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
-    <h1 class="text-xl font-bold mb-4">Edit Master Space: {{ space.nama_space }}</h1>
-    <form method="post" action="/spaces/{{ space.id }}/edit" class="space-y-4">
+{% set current_admin = user if user is defined else (admin if admin is defined else None) %}
+
+<div class="min-h-screen flex flex-col lg:flex-row bg-black">
+
+    <!-- SIDEBAR NAVIGASI HITAM SOLID -->
+    <aside class="w-full lg:w-64 flex-shrink-0 bg-zinc-950 border-b lg:border-b-0 lg:border-r border-zinc-800 p-5 flex flex-col justify-between">
         <div>
-            <label class="block text-sm font-medium mb-1">Nama Space</label>
-            <input type="text" name="nama_space" value="{{ space.nama_space }}" required class="w-full border rounded px-3 py-2">
+            <!-- Logo di Tengah -->
+            <div class="flex flex-col items-center justify-center pb-5 border-b border-zinc-800">
+                <img src="/assets/Logo.png" alt="CoWorkSpace Logo" class="h-11 w-auto object-contain">
+                <span class="mt-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500 bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 rounded-md">
+                    Admin Panel
+                </span>
+            </div>
+
+            <!-- Menu Navigasi Utama -->
+            <nav class="mt-6 space-y-1.5 text-sm">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Menu Utama</p>
+
+                <a href="/dashboard"
+                    class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Dashboard
+                </a>
+
+                <a href="/spaces"
+                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700/80 text-white font-medium transition">
+                    <span class="flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        Kelola Ruangan
+                    </span>
+                </a>
+
+                <a href="/reports"
+                    class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Laporan Keuangan
+                </a>
+            </nav>
+
+            <!-- Pintasan Kembali -->
+            <div class="mt-6 pt-5 border-t border-zinc-800/80 space-y-1.5 text-sm">
+                <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-2">Navigasi Cepat</p>
+                <a href="/spaces"
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition text-xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Kembali ke Daftar Space
+                </a>
+            </div>
         </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Tipe</label>
-            <select name="tipe" class="w-full border rounded px-3 py-2">
-                <option value="Hot Desk" {% if space.tipe == 'Hot Desk' %}selected{% endif %}>Hot Desk</option>
-                <option value="Meeting Room" {% if space.tipe == 'Meeting Room' %}selected{% endif %}>Meeting Room</option>
-                <option value="Private Office" {% if space.tipe == 'Private Office' %}selected{% endif %}>Private Office</option>
-            </select>
+
+        <!-- Profil Admin & Logout -->
+        <div class="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between gap-2">
+            <div class="truncate">
+                <p class="text-xs font-semibold text-white truncate">{{ current_admin.nama or current_admin.email if current_admin else 'Administrator' }}</p>
+                <p class="text-[11px] text-zinc-500 truncate">{{ current_admin.email if current_admin else '' }}</p>
+            </div>
+            <a href="/logout"
+                class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-950 border border-zinc-800 hover:border-rose-800 text-zinc-300 hover:text-rose-200 text-xs font-medium transition flex-shrink-0">
+                Logout
+            </a>
         </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Kapasitas</label>
-            <input type="number" name="kapasitas" value="{{ space.kapasitas }}" required class="w-full border rounded px-3 py-2">
+    </aside>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 min-w-0 p-4 md:p-8 max-w-4xl mx-auto w-full space-y-6">
+
+        <!-- Breadcrumb & Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+            <div>
+                <div class="flex items-center gap-2 text-xs text-zinc-500 mb-1.5">
+                    <a href="/spaces" class="hover:text-zinc-300 transition">Kelola Ruangan</a>
+                    <span>/</span>
+                    <span class="text-zinc-300">Edit #{{ space.id }}</span>
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Edit Master Space: {{ space.nama_space }}</h1>
+                <p class="text-xs text-zinc-400 mt-1">Perbarui detail kapasitas, tarif per jam, fasilitas, dan status ketersediaan ruangan</p>
+            </div>
+
+            <a href="/spaces"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-semibold transition self-start sm:self-auto">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Kembali
+            </a>
         </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Harga / Jam</label>
-            <input type="number" name="harga_per_jam" value="{{ space.harga_per_jam|int }}" required class="w-full border rounded px-3 py-2">
+
+        <!-- Form Card Hitam Solid -->
+        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 md:p-8">
+            <form method="post" action="/spaces/{{ space.id }}/edit" class="space-y-5">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-2">Nama Space</label>
+                        <input type="text" name="nama_space" value="{{ space.nama_space }}" required
+                            class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-2">Tipe Ruangan</label>
+                        <select name="tipe"
+                            class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition cursor-pointer">
+                            <option value="Essential" {% if space.tipe == 'Essential' %}selected{% endif %}>Essential</option>
+                            <option value="Premium" {% if space.tipe == 'Premium' %}selected{% endif %}>Premium</option>
+                            <option value="Executive" {% if space.tipe == 'Executive' %}selected{% endif %}>Executive</option>
+                            {% if space.tipe not in ['Essential', 'Premium', 'Executive'] %}
+                            <option value="{{ space.tipe }}" selected>{{ space.tipe }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-2">Kapasitas (Orang)</label>
+                        <input type="number" name="kapasitas" value="{{ space.kapasitas }}" min="1" required
+                            class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-zinc-400 mb-2">Harga / Jam (Rp)</label>
+                        <input type="number" name="harga_per_jam" value="{{ space.harga_per_jam|int }}" min="0" step="1000" required
+                            class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-zinc-400 mb-2">Fasilitas & Spesifikasi</label>
+                    <textarea name="fasilitas" rows="3" required
+                        class="w-full bg-black border border-zinc-800 focus:border-zinc-500 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none transition">{{ space.fasilitas }}</textarea>
+                </div>
+
+                <!-- Status Aktif Ruangan -->
+                <div class="p-4 rounded-xl bg-black border border-zinc-800 flex items-center justify-between gap-4">
+                    <div>
+                        <label for="is_active" class="text-sm font-medium text-white cursor-pointer block">
+                            Ruangan Aktif (Tersedia untuk dipesan)
+                        </label>
+                        <p class="text-xs text-zinc-500 mt-0.5">Nonaktifkan sementara jika ruangan sedang dalam perbaikan atau tidak disewakan</p>
+                    </div>
+                    <input type="checkbox" name="is_active" id="is_active" {% if space.is_active %}checked{% endif %}
+                        class="w-4 h-4 rounded border-zinc-700 bg-zinc-900 accent-white cursor-pointer">
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+                    <a href="/spaces"
+                        class="w-full sm:w-auto text-center px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold transition">
+                        Batal
+                    </a>
+                    <button type="submit"
+                        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition cursor-pointer">
+                        Simpan Perubahan
+                    </button>
+                </div>
+
+            </form>
         </div>
-        <div>
-            <label class="block text-sm font-medium mb-1">Fasilitas</label>
-            <input type="text" name="fasilitas" value="{{ space.fasilitas }}" required class="w-full border rounded px-3 py-2">
-        </div>
-        <div class="flex items-center space-x-2">
-            <input type="checkbox" name="is_active" id="is_active" {% if space.is_active %}checked{% endif %}>
-            <label for="is_active" class="text-sm">Ruangan Aktif (Tersedia untuk dipesan)</label>
-        </div>
-        <div class="flex space-x-3 pt-2">
-            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded font-semibold">Simpan Perubahan</button>
-            <a href="/spaces" class="bg-slate-200 px-4 py-2 rounded">Batal</a>
-        </div>
-    </form>
+
+    </div>
 </div>
 {% endblock %}
