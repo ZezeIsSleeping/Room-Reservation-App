@@ -7,6 +7,8 @@ from app.models import User, Space
 from app.auth import hash_password
 from app.routers import auth_router, dashboard_router, spaces_router, reservations_router, reports_router
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 Base.metadata.create_all(bind=engine)
 
 def seed_initial_data():
@@ -51,6 +53,12 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Co-Working Space Reservation", lifespan=lifespan)
+
+assets_dir = BASE_DIR / "assets"
+if assets_dir.is_dir():
+    app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.include_router(auth_router.router)
