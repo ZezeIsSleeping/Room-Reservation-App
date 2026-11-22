@@ -1,7 +1,9 @@
+from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 from app.database import engine, Base, SessionLocal
 from app.models import User, Space
 from app.auth import hash_password
@@ -60,7 +62,6 @@ if assets_dir.is_dir():
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 app.include_router(auth_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(spaces_router.router)
